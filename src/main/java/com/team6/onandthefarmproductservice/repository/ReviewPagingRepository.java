@@ -10,15 +10,15 @@ import org.springframework.data.repository.query.Param;
 import com.team6.onandthefarmproductservice.entity.Review;
 
 public interface ReviewPagingRepository extends PagingAndSortingRepository<Review, Long> {
-	@Query("select r from Review r join fetch r.product p join fetch p.category where r.product.productId =:productId")
+	@Query("select r from Review r join fetch r.product p join fetch p.category where r.product.productId =:productId and r.reviewStatus ='created'")
 	List<Review> findReviewListByLikeCount(PageRequest pageRequest, @Param("productId") Long productId);
 
-	@Query("select r from Review r join fetch r.product p join fetch p.category where r.product.productId =:productId")
+	@Query("select r from Review r join fetch r.product p join fetch p.category where r.product.productId =:productId and r.reviewStatus ='created'")
 	List<Review> findReviewListByNewest(PageRequest pageRequest, @Param("productId") Long productId);
 
-	@Query("select r from Review r where r.sellerId =:sellerId")
+	@Query("select r from Review r where r.sellerId =:sellerId and r.reviewStatus ='created'")
 	List<Review> findReviewListBySeller(PageRequest pageRequest, @Param("sellerId") Long sellerId);
 
-	@Query("select r from Review r where r.userId =:userId")
+	@Query("select r from Review r where r.userId =:userId and r.reviewStatus ='created'")
 	List<Review> findReviewListByUser(PageRequest pageRequest, @Param("userId") Long userId);
 }
