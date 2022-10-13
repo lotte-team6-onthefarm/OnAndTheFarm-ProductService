@@ -29,6 +29,7 @@ import com.team6.onandthefarmproductservice.repository.ReviewLikeRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewPagingRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
+import com.team6.onandthefarmproductservice.vo.OrderClientOrderProductIdResponse;
 import com.team6.onandthefarmproductservice.vo.ReviewSelectionResponse;
 import com.team6.onandthefarmproductservice.vo.UserClientUserShortInfo;
 
@@ -74,7 +75,8 @@ public class ReviewServiceImpl implements ReviewService{
 
 		Review review = modelMapper.map(reviewFormDto, Review.class);
 
-		Long productId = orderServiceClient.findProductIdByOrderProductId(reviewFormDto.getOrderProductId());
+		OrderClientOrderProductIdResponse orderClientOrderProductIdResponse = orderServiceClient.findProductIdByOrderProductId(reviewFormDto.getOrderProductId());
+		Long productId = orderClientOrderProductIdResponse.getProductId();
 		Optional<Product> product = productRepository.findById(productId);
 		Long userId = reviewFormDto.getUserId();
 		Long sellerId = product.get().getSellerId();
