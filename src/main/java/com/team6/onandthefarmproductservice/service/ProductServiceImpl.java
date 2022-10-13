@@ -36,7 +36,7 @@ import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.repository.ProductWishRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
-import com.team6.onandthefarmproductservice.vo.OrderProductResponse;
+import com.team6.onandthefarmproductservice.vo.OrderClientOrderProductIdResponse;
 import com.team6.onandthefarmproductservice.vo.ProductDetailResponse;
 import com.team6.onandthefarmproductservice.vo.ProductQnAResponse;
 import com.team6.onandthefarmproductservice.vo.ProductReviewResponse;
@@ -458,10 +458,10 @@ public class ProductServiceImpl implements ProductService {
 
 		List<ReviewableProductResponse> orderList = orderServiceClient.findProductWithoutReview(userId);
 		for(ReviewableProductResponse o : orderList){
-			List<OrderProductResponse> orderProductList = orderServiceClient.findByOrdersId(o.getOrdersId());
+			List<OrderClientOrderProductIdResponse> orderProductList = orderServiceClient.findByOrdersId(o.getOrdersId());
 			SellerClientSellerDetailResponse seller = sellerServiceClient.findBySellerId(o.getSellerId());
 
-			for(OrderProductResponse orderProduct : orderProductList){
+			for(OrderClientOrderProductIdResponse orderProduct : orderProductList){
 				Optional<Review> review = reviewRepository.findReviewByOrderProductId(orderProduct.getOrderProductId());
 
 				if(!review.isPresent()) {

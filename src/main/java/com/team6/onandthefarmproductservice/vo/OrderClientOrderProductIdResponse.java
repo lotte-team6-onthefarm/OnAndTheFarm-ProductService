@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderProductResponse {
+public class OrderClientOrderProductIdResponse {
 	private Long orderProductId;
 	private Long productId;
 }

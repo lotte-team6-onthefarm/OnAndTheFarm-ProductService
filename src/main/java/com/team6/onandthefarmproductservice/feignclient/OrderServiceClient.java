@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.team6.onandthefarmproductservice.vo.OrderProductResponse;
+import com.team6.onandthefarmproductservice.vo.OrderClientOrderProductIdResponse;
 import com.team6.onandthefarmproductservice.vo.ReviewableProductResponse;
 
 @FeignClient(name = "order-service")
@@ -16,8 +16,8 @@ public interface OrderServiceClient {
 	List<ReviewableProductResponse> findProductWithoutReview(@PathVariable("user-no") Long userId);
 
 	@GetMapping("/api/user/order-service/order-product/{orders-no}")
-	List<OrderProductResponse> findByOrdersId(@PathVariable("orders-no") Long ordersId);
+	List<OrderClientOrderProductIdResponse> findByOrdersId(@PathVariable("orders-no") Long ordersId);
 
 	@GetMapping("/api/user/order-service/order-product/{order-product-no}")
-	Long findProductIdByOrderProductId(@PathVariable("order-product-no") Long orderProductId);
+	OrderClientOrderProductIdResponse findProductIdByOrderProductId(@PathVariable("order-product-no") Long orderProductId);
 }

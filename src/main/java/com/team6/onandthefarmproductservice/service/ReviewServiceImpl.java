@@ -22,15 +22,15 @@ import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.entity.Review;
 import com.team6.onandthefarmproductservice.entity.ReviewLike;
 import com.team6.onandthefarmproductservice.feignclient.OrderServiceClient;
-import com.team6.onandthefarmproductservice.feignclient.SellerServiceClient;
 import com.team6.onandthefarmproductservice.feignclient.UserServiceClient;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewLikeRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewPagingRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
+import com.team6.onandthefarmproductservice.vo.OrderClientOrderProductIdResponse;
 import com.team6.onandthefarmproductservice.vo.ReviewSelectionResponse;
-import com.team6.onandthefarmproductservice.vo.UserClientUserShortInfo;
+import com.team6.onandthefarmproductservice.vo.UserClientUserShortInfoResponse;
 
 @Service
 @Transactional
@@ -74,7 +74,8 @@ public class ReviewServiceImpl implements ReviewService{
 
 		Review review = modelMapper.map(reviewFormDto, Review.class);
 
-		Long productId = orderServiceClient.findProductIdByOrderProductId(reviewFormDto.getOrderProductId());
+		OrderClientOrderProductIdResponse orderClientOrderProductIdResponse = orderServiceClient.findProductIdByOrderProductId(reviewFormDto.getOrderProductId());
+		Long productId = orderClientOrderProductIdResponse.getProductId();
 		Optional<Product> product = productRepository.findById(productId);
 		Long userId = reviewFormDto.getUserId();
 		Long sellerId = product.get().getSellerId();
@@ -227,7 +228,7 @@ public class ReviewServiceImpl implements ReviewService{
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 
 		for (Review review : reviews) {
-			UserClientUserShortInfo userClientUserShortInfo = userServiceClient.findUserNameByUserId(review.getUserId());
+			UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(review.getUserId());
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse.builder()
 					.reviewId(review.getReviewId())
 					.reviewContent(review.getReviewContent())
@@ -235,11 +236,11 @@ public class ReviewServiceImpl implements ReviewService{
 					.reviewModifiedAt(review.getReviewModifiedAt())
 					.reviewLikeCount(review.getReviewLikeCount())
 					.reviewRate(review.getReviewRate())
-					.userProfileImg(userClientUserShortInfo.getUserProfileImg())
-					.userEmail(userClientUserShortInfo.getUserEmail())
+					.userProfileImg(userClientUserShortInfoResponse.getUserProfileImg())
+					.userEmail(userClientUserShortInfoResponse.getUserEmail())
 					.productMainImgSrc(review.getProduct().getProductMainImgSrc())
 					.productName(review.getProduct().getProductName())
-					.userName(userClientUserShortInfo.getUserName())
+					.userName(userClientUserShortInfoResponse.getUserName())
 					.build();
 			reviewResponse.add(reviewSelectionResponse);
 		}
@@ -254,7 +255,7 @@ public class ReviewServiceImpl implements ReviewService{
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 
 		for (Review review : reviews) {
-			UserClientUserShortInfo userClientUserShortInfo = userServiceClient.findUserNameByUserId(review.getUserId());
+			UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(review.getUserId());
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse.builder()
 					.reviewId(review.getReviewId())
 					.reviewContent(review.getReviewContent())
@@ -262,11 +263,11 @@ public class ReviewServiceImpl implements ReviewService{
 					.reviewModifiedAt(review.getReviewModifiedAt())
 					.reviewLikeCount(review.getReviewLikeCount())
 					.reviewRate(review.getReviewRate())
-					.userProfileImg(userClientUserShortInfo.getUserProfileImg())
-					.userEmail(userClientUserShortInfo.getUserEmail())
+					.userProfileImg(userClientUserShortInfoResponse.getUserProfileImg())
+					.userEmail(userClientUserShortInfoResponse.getUserEmail())
 					.productMainImgSrc(review.getProduct().getProductMainImgSrc())
 					.productName(review.getProduct().getProductName())
-					.userName(userClientUserShortInfo.getUserName())
+					.userName(userClientUserShortInfoResponse.getUserName())
 					.build();
 			reviewResponse.add(reviewSelectionResponse);
 		}
