@@ -2,6 +2,7 @@ package com.team6.onandthefarmproductservice.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class DateUtils {
 
     public String transDate(String pattern){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, Locale.KOREA);
         String date = simpleDateFormat.format(new Date());
         return date;
     }

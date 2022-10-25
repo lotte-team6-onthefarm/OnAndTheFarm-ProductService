@@ -7,6 +7,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,10 +27,16 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @ToString
-public class Product {
+@SequenceGenerator(
+        name="PRODUCT_SEQ_GENERATOR",
+        sequenceName = "PRODUCT_SEQ",
+        initialValue = 100000, allocationSize = 1
+)
+public class Product{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "PRODUCT_SEQ_GENERATOR")
     private Long productId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -61,6 +70,8 @@ public class Product {
     private Integer productWishCount;
 
     private Integer productSoldCount;
+
+    private Integer productViewCount;
 
     public Long updateProduct(Category category, String productName, Integer productPrice,
             Integer productTotalStock, String productMainImgSrc, String productDetail,

@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,10 +24,16 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Getter
 @Setter
+@SequenceGenerator(
+        name="WISH_SEQ_GENERATOR",
+        sequenceName = "WISH_SEQ",
+        initialValue = 100000, allocationSize = 1
+)
 public class Wish {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "WISH_SEQ_GENERATOR")
     private Long wishId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,4 +41,6 @@ public class Wish {
     private Product product;
 
     private Long userId;
+
+    private Boolean wishStatus;
 }

@@ -6,8 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.team6.onandthefarmproductservice.vo.OrderClientOrderProductIdResponse;
-import com.team6.onandthefarmproductservice.vo.ReviewableProductResponse;
+import com.team6.onandthefarmproductservice.vo.order.OrderClientOrderProductIdResponse;
+import com.team6.onandthefarmproductservice.vo.review.ReviewableProductResponse;
 
 @FeignClient(name = "order-service")
 public interface OrderServiceClient {
