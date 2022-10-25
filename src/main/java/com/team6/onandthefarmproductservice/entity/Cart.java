@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 
 import lombok.AllArgsConstructor;
@@ -23,10 +24,16 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Getter
 @Setter
+@SequenceGenerator(
+        name="CART_SEQ_GENERATOR",
+        sequenceName = "CART_SEQ",
+        initialValue = 100000, allocationSize = 1
+)
 public class Cart {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+        generator = "CART_SEQ_GENERATOR")
     private Long cartId;
 
     @OneToOne(fetch = FetchType.LAZY)

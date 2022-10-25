@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,10 +23,16 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Getter
 @Setter
+@SequenceGenerator(
+        name="PRODUCT_QNA_ANSWER_SEQ_GENERATOR",
+        sequenceName = "PRODUCT_QNA_ANSWER_SEQ",
+        initialValue = 100000, allocationSize = 1
+)
 public class ProductQnaAnswer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "PRODUCT_QNA_ANSWER_SEQ_GENERATOR")
     private Long productQnaAnswerId;
 
     @OneToOne(fetch = FetchType.LAZY)

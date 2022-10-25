@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team6.onandthefarmproductservice.service.ReviewService;
 import com.team6.onandthefarmproductservice.util.BaseResponse;
-import com.team6.onandthefarmproductservice.vo.ReviewSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponse;
 
 import lombok.RequiredArgsConstructor;
 import springfox.documentation.annotations.ApiIgnore;
@@ -26,7 +26,17 @@ public class SellerReviewController {
 	@GetMapping("/list/by-seller/{page-no}")
 	public ResponseEntity<BaseResponse<List<ReviewSelectionResponse>>> getReviewBySellerNewest(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber){
 
-		Long sellerId = Long.parseLong(principal.getName());
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
+		String[] principalInfo = principal.getName().split(" ");
+		Long sellerId = Long.parseLong(principalInfo[0]);
+
 		List<ReviewSelectionResponse> reviews = reviewService.getReviewBySellerNewest(sellerId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()

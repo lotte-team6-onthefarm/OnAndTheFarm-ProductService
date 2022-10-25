@@ -2,7 +2,6 @@ package com.team6.onandthefarmproductservice.controller;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -16,19 +15,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.team6.onandthefarmproductservice.dto.ProductWishCancelDto;
-import com.team6.onandthefarmproductservice.dto.ProductWishFormDto;
-import com.team6.onandthefarmproductservice.dto.ProductWishResultDto;
-import com.team6.onandthefarmproductservice.entity.ProductQna;
-import com.team6.onandthefarmproductservice.entity.ProductQnaAnswer;
+import com.team6.onandthefarmproductservice.dto.product.ProductWishCancelDto;
+import com.team6.onandthefarmproductservice.dto.product.ProductWishFormDto;
+import com.team6.onandthefarmproductservice.dto.product.ProductWishResultDto;
 import com.team6.onandthefarmproductservice.service.ProductService;
 import com.team6.onandthefarmproductservice.util.BaseResponse;
-import com.team6.onandthefarmproductservice.vo.ProductDetailResponse;
-import com.team6.onandthefarmproductservice.vo.ProductInfoResponse;
-import com.team6.onandthefarmproductservice.vo.ProductQnAResponse;
-import com.team6.onandthefarmproductservice.vo.ProductSelectionResponse;
-import com.team6.onandthefarmproductservice.vo.ProductWishCancelRequest;
-import com.team6.onandthefarmproductservice.vo.ProductWishFormRequest;
+import com.team6.onandthefarmproductservice.vo.product.ProductDetailResponse;
+import com.team6.onandthefarmproductservice.vo.product.ProductQnAInfoResponse;
+import com.team6.onandthefarmproductservice.vo.product.ProductQnAResponse;
+import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.product.ProductWishCancelRequest;
+import com.team6.onandthefarmproductservice.vo.product.ProductWishFormRequest;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +42,22 @@ public class UserProductController {
 	@ApiOperation("위시리스트 추가")
 	public ResponseEntity<BaseResponse> addProductToWishList(@ApiIgnore Principal principal,
 			@RequestBody ProductWishFormRequest productWishFormRequest) throws Exception {
+
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
+		String[] principalInfo = principal.getName().split(" ");
+		Long userId = Long.parseLong(principalInfo[0]);
+
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		ProductWishFormDto productWishFormDto = modelMapper.map(productWishFormRequest, ProductWishFormDto.class);
-		productWishFormDto.setUserId(Long.parseLong(principal.getName()));
+		productWishFormDto.setUserId(userId);
 		ProductWishResultDto resultDto = productService.addProductToWishList(productWishFormDto);
 
 		BaseResponse baseResponse = null;
@@ -74,11 +83,23 @@ public class UserProductController {
 	@ApiOperation("위시리스트 삭제")
 	public ResponseEntity<BaseResponse> deleteProductToWishList(@ApiIgnore Principal principal,
 			@RequestBody ProductWishCancelRequest productWishCancelRequest) throws Exception {
+
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
+		String[] principalInfo = principal.getName().split(" ");
+		Long userId = Long.parseLong(principalInfo[0]);
+
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		ProductWishCancelDto productWishCancelDto = modelMapper.map(productWishCancelRequest,
 				ProductWishCancelDto.class);
-		productWishCancelDto.setUserId(Long.parseLong(principal.getName()));
+		productWishCancelDto.setUserId(userId);
 		List<Long> wishId = productService.cancelProductFromWishList(productWishCancelDto);
 
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -92,10 +113,12 @@ public class UserProductController {
 
 	@GetMapping(value = "/{product-id}")
 	@ApiOperation(value = "상품 단건 조회")
-	public ResponseEntity<ProductInfoResponse> findProductDetail(@ApiIgnore Principal principal, @PathVariable("product-id") Long productId) {
+	public ResponseEntity<ProductDetailResponse> findProductDetail(@ApiIgnore Principal principal, @PathVariable("product-id") Long productId) {
+
 		Long userId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
 		ProductDetailResponse product = productService.findProductDetail(productId, userId);
 
@@ -115,11 +138,11 @@ public class UserProductController {
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getAllProductListOrderByNewest(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getAllProductListOrderByNewest(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -137,11 +160,12 @@ public class UserProductController {
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsListByHighPrice(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsListByHighPrice(userId,
+				Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -159,15 +183,34 @@ public class UserProductController {
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsListByLowPrice(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsListByLowPrice(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("getting products by high price completed")
+				.data(products)
+				.build();
+
+		return new ResponseEntity(baseResponse, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/list/main")
+	@ApiOperation(value = "상품 메인 화면 조회(판매순 10개)")
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getMainProductsListBySoldCount(
+			@ApiIgnore Principal principal){
+		Long userId = null;
+		if(principal != null){
+			String [] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
+		}
+		List<ProductSelectionResponse> products = productService.getMainProductsBySoldCount(userId);
+		BaseResponse baseResponse = BaseResponse.builder()
+				.httpStatus(HttpStatus.OK)
+				.message("getting main view products by sold count")
 				.data(products)
 				.build();
 
@@ -181,15 +224,15 @@ public class UserProductController {
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsBySoldCount(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsBySoldCount(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
-				.message("getting products by high price completed")
+				.message("getting products by sold count completed")
 				.data(products)
 				.build();
 
@@ -204,7 +247,8 @@ public class UserProductController {
 
 		Long userId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
 		List<ProductSelectionResponse> products = productService.getProductListBySellerNewest(userId, sellerId,
 				Integer.valueOf(pageNumber));
@@ -225,11 +269,11 @@ public class UserProductController {
 			@PathVariable("category") String category, @PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryNewest(userId, sellerId, category,
+		List<ProductSelectionResponse> products = productService.getProductListByCategoryNewest(userId, category,
 				Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -246,12 +290,13 @@ public class UserProductController {
 	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByCategoryHighest(
 			@ApiIgnore Principal principal,
 			@PathVariable("category") String category, @PathVariable("page-no") String pageNumber){
+
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryHighest(userId, sellerId, category, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductListByCategoryHighest(userId, category, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -267,12 +312,13 @@ public class UserProductController {
 	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByCategoryLowest(
 			@ApiIgnore Principal principal,
 			@PathVariable("category") String category, @PathVariable("page-no") String pageNumber){
+
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryLowest(userId, sellerId, category, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductListByCategoryLowest(userId, category, Integer.valueOf(pageNumber));
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("getting lowest products by category completed")
@@ -289,11 +335,11 @@ public class UserProductController {
 			@PathVariable("category") String category, @PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
 		if (principal != null){
-			userId = Long.parseLong(principal.getName());
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsByCategorySoldCount(userId, sellerId, category, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsByCategorySoldCount(userId, category, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -306,16 +352,21 @@ public class UserProductController {
 
 	@GetMapping("/QnA/{product-no}")
 	@ApiOperation(value = "상품에 대한 질의 조회")
-	public ResponseEntity<BaseResponse<Map<ProductQna, ProductQnaAnswer>>> findProductQnAList(
+	public ResponseEntity<BaseResponse<ProductQnAInfoResponse>> findProductQnAList(
 			@PathVariable("product-no") Long productId) {
 
 		List<ProductQnAResponse> products
 				= productService.findProductQnAList(productId);
 
+		ProductQnAInfoResponse productQnAInfoResponse = ProductQnAInfoResponse.builder()
+				.productQnAResponseList(products)
+				.qnACount(products.size())
+				.build();
+
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("OK")
-				.data(products)
+				.data(productQnAInfoResponse)
 				.build();
 
 		return new ResponseEntity(baseResponse, HttpStatus.OK);

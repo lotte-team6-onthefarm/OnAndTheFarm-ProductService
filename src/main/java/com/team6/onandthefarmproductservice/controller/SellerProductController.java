@@ -13,18 +13,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.team6.onandthefarmproductservice.dto.ProductDeleteDto;
-import com.team6.onandthefarmproductservice.dto.ProductFormDto;
-import com.team6.onandthefarmproductservice.dto.ProductUpdateFormDto;
+import com.team6.onandthefarmproductservice.dto.product.ProductDeleteDto;
+import com.team6.onandthefarmproductservice.dto.product.ProductFormDto;
+import com.team6.onandthefarmproductservice.dto.product.ProductUpdateFormDto;
 import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.service.ProductService;
 import com.team6.onandthefarmproductservice.util.BaseResponse;
-import com.team6.onandthefarmproductservice.vo.ProductDeleteRequest;
-import com.team6.onandthefarmproductservice.vo.ProductFormRequest;
-import com.team6.onandthefarmproductservice.vo.ProductSelectionResponse;
-import com.team6.onandthefarmproductservice.vo.ProductUpdateFormRequest;
+import com.team6.onandthefarmproductservice.vo.product.ProductDeleteRequest;
+import com.team6.onandthefarmproductservice.vo.product.ProductFormRequest;
+import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.product.ProductUpdateFormRequest;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +42,31 @@ public class SellerProductController {
 	@PostMapping(value = "/new")
 	@ApiOperation(value = "상품 등록")
 	//@RequestPart("productImg") List<MultipartFile> productImgs
-	public ResponseEntity<BaseResponse<Product>> productForm(@ApiIgnore Principal principal, @RequestBody ProductFormRequest productFormRequest) throws
-			Exception {
+	public ResponseEntity<BaseResponse<Product>> productForm(
+			@ApiIgnore Principal principal,
+			@RequestPart(value = "images", required = false) List<MultipartFile> photo,
+			@RequestPart(value = "data", required = false) ProductFormRequest productFormRequest
+			) throws Exception {
+
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
+		String[] principalInfo = principal.getName().split(" ");
+		Long sellerId = Long.parseLong(principalInfo[0]);
 
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
 		ProductFormDto productFormDto = modelMapper.map(productFormRequest, ProductFormDto.class);
-		productFormDto.setSellerId(Long.parseLong(principal.getName()));
-		Long sellerId = Long.parseLong(principal.getName());
-		Long productId = productService.saveProduct(sellerId, productFormDto);
+		productFormDto.setSellerId(sellerId);
+		productFormDto.setImages(photo);
+
+		Long productId = productService.saveProduct(productFormDto);
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.CREATED)
@@ -63,12 +80,27 @@ public class SellerProductController {
 	@PutMapping(value = "/update")
 	@ApiOperation(value = "상품 수정")
 	public ResponseEntity<BaseResponse<Product>> productUpdateForm(
-			@RequestBody ProductUpdateFormRequest productUpdateFormRequest) throws Exception {
+			@ApiIgnore Principal principal,
+			@RequestPart(value = "images", required = false) List<MultipartFile> photo,
+			@RequestPart(value = "mainImage", required = false) List<MultipartFile> mainPhoto,
+			@RequestPart(value = "data", required = false) ProductUpdateFormRequest productUpdateFormRequest )
+			throws Exception {
+
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
 		ProductUpdateFormDto productUpdateFormDto = modelMapper.map(productUpdateFormRequest,
 				ProductUpdateFormDto.class);
+		productUpdateFormDto.setAddImageList(photo);
+		productUpdateFormDto.setMainImage(mainPhoto);
 
 		Long productId = productService.updateProduct(productUpdateFormDto);
 
@@ -104,11 +136,10 @@ public class SellerProductController {
 
 	@GetMapping(value = "/list/all/newest/{page-no}")
 	@ApiOperation(value = "모든 상품 최신순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getAllProductListOrderByNewest(@ApiIgnore Principal principal,
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getAllProductListOrderByNewest(
 			@PathVariable("page-no") String pageNumber) {
 		Long userId = null;
-		Long sellerId = Long.parseLong(principal.getName());
-		List<ProductSelectionResponse> products = productService.getAllProductListOrderByNewest(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getAllProductListOrderByNewest(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -121,12 +152,11 @@ public class SellerProductController {
 
 	@GetMapping(value = "/list/orderby/highprice/{page-no}")
 	@ApiOperation(value = "상품 높은 가격 순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByHighPrice(@ApiIgnore Principal principal,
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByHighPrice(
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = Long.parseLong(principal.getName());
-		List<ProductSelectionResponse> products = productService.getProductsListByHighPrice(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsListByHighPrice(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -139,12 +169,11 @@ public class SellerProductController {
 
 	@GetMapping(value = "/list/orderby/lowprice/{page-no}")
 	@ApiOperation(value = "상품 낮은 가격 순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByLowPrice(@ApiIgnore Principal principal,
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByLowPrice(
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = Long.parseLong(principal.getName());
-		List<ProductSelectionResponse> products = productService.getProductsListByLowPrice(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsListByLowPrice(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -157,12 +186,11 @@ public class SellerProductController {
 
 	@GetMapping(value = "/list/orderby/soldcount/{page-no}")
 	@ApiOperation(value = "상품 높은 판매순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductsListBySoldCount(@ApiIgnore Principal principal,
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductsListBySoldCount(
 			@PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = Long.parseLong(principal.getName());
-		List<ProductSelectionResponse> products = productService.getProductsBySoldCount(userId, sellerId, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductsBySoldCount(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -175,11 +203,10 @@ public class SellerProductController {
 
 	@GetMapping(value = "/list/orderby/seller/{sellerId}/{page-no}")
 	@ApiOperation(value = "상품 농부별 최신순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductsListBySellerNewest(@ApiIgnore Principal principal,
-			@PathVariable("page-no") String pageNumber) {
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductsListBySellerNewest(
+			@PathVariable("sellerId") Long sellerId, @PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = Long.parseLong(principal.getName());
 		List<ProductSelectionResponse> products = productService.getProductListBySellerNewest(userId, sellerId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -197,8 +224,7 @@ public class SellerProductController {
 			@PathVariable("category") String category, @PathVariable("page-no") String pageNumber) {
 
 		Long userId = null;
-		Long sellerId = null;
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryNewest(userId, sellerId, category, Integer.valueOf(pageNumber));
+		List<ProductSelectionResponse> products = productService.getProductListByCategoryNewest(userId, category, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -209,13 +235,23 @@ public class SellerProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/list/orderby/seller/{page-no}")
-	@ApiOperation(value = "농부별 자신이 등록한 상품 최신순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getNewestProductList(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber) {
+	@GetMapping(value = "/list/selling-product/by-seller/{page-no}")
+	@ApiOperation(value = "농부별 자신이 등록한 판매중 상품 최신순 조회")
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getSellingProductListBy(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber) {
 
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
+		String[] principalInfo = principal.getName().split(" ");
+		Long sellerId = Long.parseLong(principalInfo[0]);
 		Long userId = null;
-		Long sellerId = Long.parseLong(principal.getName());
-		List<ProductSelectionResponse> products = productService.getProductListBySellerNewest(userId, sellerId, Integer.valueOf(pageNumber));
+
+		List<ProductSelectionResponse> products = productService.getSellingProductListBySellerNewest(userId, sellerId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -226,6 +262,30 @@ public class SellerProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	//셀러 기준 질의 조회 구현 요망!
+	@GetMapping(value = "/list/pause-product/by-seller/{page-no}")
+	@ApiOperation(value = "농부별 자신이 등록한 일시정지 상품 최신순 조회")
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getPauseProductListBy(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber) {
 
+		if(principal == null){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.FORBIDDEN)
+					.message("no authorization")
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
+
+		String[] principalInfo = principal.getName().split(" ");
+		Long sellerId = Long.parseLong(principalInfo[0]);
+		Long userId = null;
+
+		List<ProductSelectionResponse> products = productService.getPauseProductListBySellerNewest(userId, sellerId, Integer.valueOf(pageNumber));
+
+		BaseResponse baseResponse = BaseResponse.builder()
+				.httpStatus(HttpStatus.OK)
+				.message("getting Newest products by farmer completed")
+				.data(products)
+				.build();
+
+		return new ResponseEntity(baseResponse, HttpStatus.OK);
+	}
 }
