@@ -2,6 +2,7 @@ package com.team6.onandthefarmproductservice.repository;
 
 import java.util.List;
 
+import com.team6.onandthefarmproductservice.feignclient.vo.ProductVo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -27,10 +28,10 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
 
 	List<Product> findBySellerOrderByProductWishCountDesc(Seller seller);
 
-	@Query("select p from Product p where p.seller.sellerId=:sellerId and p.productStatus<>'selling'")
-	List<Product> findNotSellingProduct(@Param("sellerId") Long sellerId);
+	@Query("select p from Product p where p.sellerId=:sellerId and p.productStatus<>'selling'")
+	List<ProductVo> findNotSellingProduct(@Param("sellerId") Long sellerId);
 
-	@Query("select p from Product p where p.seller.sellerId=:sellerId and p.productStatus='selling'")
-	List<Product> findSellingProduct(@Param("sellerId") Long sellerId);
+	@Query("select p from Product p where p.sellerId=:sellerId and p.productStatus='selling'")
+	List<ProductVo> findSellingProduct(@Param("sellerId") Long sellerId);
 }
 
