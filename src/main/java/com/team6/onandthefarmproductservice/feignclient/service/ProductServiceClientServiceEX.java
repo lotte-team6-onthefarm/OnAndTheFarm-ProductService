@@ -1,12 +1,17 @@
 package com.team6.onandthefarmproductservice.feignclient.service;
 
-import com.team6.onandthefarmproductservice.feignclient.vo.CartClientResponse;
-import com.team6.onandthefarmproductservice.feignclient.vo.ProductClientResponse;
+import com.team6.onandthefarmproductservice.feignclient.vo.*;
 
 import java.util.List;
 
 public interface ProductServiceClientServiceEX {
-    List<CartClientResponse> findByUserId(Long userId);
+    List<CartVo> findCartByUserId(Long userId);
 
-    ProductClientResponse findByProductId(Long productId);
+    ProductVo findByProductId(Long productId);
+
+    List<ProductVo> findNotSellingProduct(Long sellerId);
+
+    List<ProductVo> findSellingProduct(Long sellerId);
+
+    List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId);
 }

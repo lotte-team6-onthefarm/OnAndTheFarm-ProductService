@@ -2,9 +2,9 @@ package com.team6.onandthefarmproductservice.feignclient.service;
 
 import com.team6.onandthefarmproductservice.entity.Cart;
 import com.team6.onandthefarmproductservice.entity.Product;
-import com.team6.onandthefarmproductservice.feignclient.vo.CartClientResponse;
-import com.team6.onandthefarmproductservice.feignclient.vo.ProductClientResponse;
+import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.repository.CartRepository;
+import com.team6.onandthefarmproductservice.repository.ProductQnaRepository;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,15 +24,17 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
 
     private final ProductRepository productRepository;
 
-    public List<CartClientResponse> findByUserId(Long userId){
+    private final ProductQnaRepository productQnaRepository;
+
+    public List<CartVo> findCartByUserId(Long userId){
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         List<Cart> carts = cartRepository.findByUser(userId);
-        List<CartClientResponse> responses = new ArrayList<>();
+        List<CartVo> responses = new ArrayList<>();
 
         for(Cart cart : carts){
-            CartClientResponse response = modelMapper.map(cart,CartClientResponse.class);
+            CartVo response = modelMapper.map(cart,CartVo.class);
             response.setProductId(cart.getProduct().getProductId());
             responses.add(response);
         }
@@ -40,14 +42,26 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         return responses;
     }
 
-    public ProductClientResponse findByProductId(Long productId){
+    public ProductVo findByProductId(Long productId){
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Product product = productRepository.findById(productId).get();
-        ProductClientResponse response = modelMapper.map(product, ProductClientResponse.class);
+        ProductVo response = modelMapper.map(product, ProductVo.class);
         response.setCategoryId(product.getCategory().getCategoryId());
 
         return response;
+    }
+
+    public List<ProductVo> findNotSellingProduct(Long sellerId){
+        return productRepository.findNotSellingProduct(sellerId);
+    }
+
+    public List<ProductVo> findSellingProduct(Long sellerId){
+        return productRepository.findNotSellingProduct(sellerId);
+    }
+
+    public List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId){
+        return productQnaRepository.findBeforeAnswerProductQna(sellerId);
     }
 }

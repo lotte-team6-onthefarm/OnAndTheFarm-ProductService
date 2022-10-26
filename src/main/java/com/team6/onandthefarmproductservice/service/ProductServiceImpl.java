@@ -517,7 +517,9 @@ public class ProductServiceImpl implements ProductService {
 		List<ProductSelectionResponse> productResponseList = new ArrayList<>();
 
 		for(Product p : productList) {
-			ProductSelectionResponse pResponse = new ProductSelectionResponse(p);
+			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(p.getSellerId());
+
+			ProductSelectionResponse pResponse = new ProductSelectionResponse(p, sellerClientSellerDetailResponse);
 			pResponse.setTotalPage(totalPage);
 			pResponse.setNowPage(nowPage);
 			pResponse.setTotalElement(totalElements);

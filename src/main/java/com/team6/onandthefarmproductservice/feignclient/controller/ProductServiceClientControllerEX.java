@@ -1,8 +1,7 @@
 package com.team6.onandthefarmproductservice.feignclient.controller;
 
 import com.team6.onandthefarmproductservice.feignclient.service.ProductServiceClientServiceEX;
-import com.team6.onandthefarmproductservice.feignclient.vo.CartClientResponse;
-import com.team6.onandthefarmproductservice.feignclient.vo.ProductClientResponse;
+import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +21,9 @@ public class ProductServiceClientControllerEX {
      * @param userId
      * @return
      */
-    @GetMapping("/api/user/product-service/cart/{user-no}")
-    public List<CartClientResponse> findByUserId(@PathVariable("user-no") Long userId){
-        return productServiceClientService.findByUserId(userId);
+    @GetMapping("/api/user/cart/product-service/{user-no}")
+    public List<CartVo> findByUserId(@PathVariable("user-no") Long userId){
+        return productServiceClientService.findCartByUserId(userId);
     }
 
     /**
@@ -32,8 +31,27 @@ public class ProductServiceClientControllerEX {
      * @param productId
      * @return
      */
-    @GetMapping("/api/user/product-service/product/{product-no}")
-    public ProductClientResponse findByProductId(@PathVariable("product-no") Long productId){
+    @GetMapping("/api/user/product/product-service/{product-no}")
+    public ProductVo findByProductId(@PathVariable("product-no") Long productId){
         return productServiceClientService.findByProductId(productId);
+    }
+
+    /**
+     * 판매하지 않는 상품리스트 조회
+     * @param sellerId
+     * @return
+     */
+    @GetMapping("/api/user/product/product-service/no-selling/{seller-no}")
+    List<ProductVo> findNotSellingProduct(Long sellerId){
+        return productServiceClientService.findNotSellingProduct(sellerId);
+    }
+    @GetMapping("/api/user/product/product-service/selling/{seller-no}")
+    List<ProductVo> findSellingProduct(Long sellerId){
+        return productServiceClientService.findSellingProduct(sellerId);
+    }
+
+    @GetMapping("/api/user/product/product-service/qna/{seller-no}")
+    List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId){
+        return productServiceClientService.findBeforeAnswerProductQna(sellerId);
     }
 }
