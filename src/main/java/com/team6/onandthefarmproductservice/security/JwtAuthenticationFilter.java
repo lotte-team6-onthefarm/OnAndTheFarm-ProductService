@@ -19,22 +19,18 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenUtil jwtTokenUtil;
-
     private String adminKey;
 
     Environment env;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, Environment env) {
-        this.jwtTokenUtil = jwtTokenUtil;
+    public JwtAuthenticationFilter(Environment env) {
         this.env = env;
         this.adminKey = env.getProperty("custom-api-key.jwt.admin-key");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //String accessToken = request.getHeader("Authorization");
         String memberId = request.getHeader("memberId");
         String memberRole = request.getHeader("memberRole");
 
