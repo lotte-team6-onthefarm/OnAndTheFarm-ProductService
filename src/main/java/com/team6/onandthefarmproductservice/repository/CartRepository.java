@@ -11,11 +11,11 @@ import com.team6.onandthefarmproductservice.entity.Cart;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
-    @Query("select c from Cart c join fetch c.product p where c.user.userId =:userId and c.cartStatus is true")
+    @Query("select c from Cart c join fetch c.product p where c.userId =:userId and c.cartStatus is true")
     List<Cart> findNotDeletedCartByUserId(@Param("userId") Long userId);
 
-    List<Cart> findByUser(Long userId);
+    List<Cart> findByUserId(Long userId);
 
-    @Query("select c from Cart c where c.user.userId =:userId and c.product.productId=:productId and c.cartStatus is true")
+    @Query("select c from Cart c where c.userId =:userId and c.product.productId=:productId and c.cartStatus is true")
     Optional<Cart> findNotDeletedCartByProduct(@Param("productId") Long productId, @Param("userId") Long userId);
 }

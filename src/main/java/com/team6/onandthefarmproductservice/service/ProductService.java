@@ -57,4 +57,6 @@ public interface ProductService {
 	List<ProductReviewResponse> getProductsWithoutReview(Long userId);
 	
     ProductDetailResponse findProductDetail(Long productId, Long userId);
+
+    void updateStockAndSoldCount(Object productStockDto);
 }

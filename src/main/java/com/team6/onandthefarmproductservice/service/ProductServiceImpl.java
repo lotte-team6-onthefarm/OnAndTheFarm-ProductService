@@ -2,6 +2,7 @@ package com.team6.onandthefarmproductservice.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -588,6 +589,21 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 		return productReviewResponses;
+	}
+
+	public void updateStockAndSoldCount(Object productStockDto){
+		HashMap<String,Object> productStock = (HashMap<String,Object>) productStockDto;
+		for(String key : productStock.keySet()){
+			Product product = productRepository.findById(Long.valueOf(String.valueOf(productStock.get(key)))).get();
+			// 상품 재고 차감
+			product.setProductTotalStock(product.getProductTotalStock()-(Integer)productStock.get(key));
+			// 상품 판매 count 증가
+			product.setProductSoldCount(product.getProductSoldCount()+1);
+			// 재고 차감 시 재고가 0일 경우 product status를 soldout으로 변경
+			if(product.getProductSoldCount()==0){
+				product.setProductStatus("soldout");
+			}
+		}
 	}
 
 }

@@ -11,11 +11,11 @@ import com.team6.onandthefarmproductservice.entity.ProductQna;
 import org.springframework.data.repository.query.Param;
 
 public interface ProductQnaRepository extends CrudRepository<ProductQna,Long> {
-    List<ProductQna> findBySeller(Long sellerId);
+//    List<ProductQna> findBySeller(Long sellerId);
 
     List<ProductQna> findByProduct(Product product);
 
-    List<ProductQna> findByUser(Long userId);
+//    List<ProductQna> findByUser(Long userId);
 
     @Query("select q from ProductQna q where q.sellerId=:sellerId and q.productQnaStatus='waiting'")
     List<ProductQnaVo> findBeforeAnswerProductQna(@Param("sellerId") Long sellerId);
