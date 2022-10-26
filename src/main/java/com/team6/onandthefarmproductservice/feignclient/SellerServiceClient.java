@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.team6.onandthefarmproductservice.vo.product.SellerClientSellerDetailResponse;
 
-@FeignClient(name = "member-service")
+@FeignClient(name = "member-service", contextId = "member-service-seller")
 public interface SellerServiceClient {
-	@GetMapping("/api/seller/member-service/seller/{seller-no}")
+	@GetMapping("/api/seller/seller/member-service/{seller-no}")
 	SellerClientSellerDetailResponse findBySellerId(@PathVariable("seller-no") Long sellerId);
 }

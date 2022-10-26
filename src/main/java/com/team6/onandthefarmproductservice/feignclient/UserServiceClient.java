@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.team6.onandthefarmproductservice.vo.product.UserClientUserShortInfoResponse;
 
-@FeignClient(name = "member-service")
+@FeignClient(name = "member-service", contextId = "member-service-user")
 public interface UserServiceClient {
-	@GetMapping("/api/user/member-service/username/{user-no}")
+	@GetMapping("/api/user/user/member-service/{user-no}")
 	UserClientUserShortInfoResponse findUserNameByUserId(@PathVariable("user-no") Long userId);
 }
