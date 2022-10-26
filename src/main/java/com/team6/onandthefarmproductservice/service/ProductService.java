@@ -3,17 +3,8 @@ package com.team6.onandthefarmproductservice.service;
 import java.io.IOException;
 import java.util.List;
 
-import com.team6.onandthefarmproductservice.dto.product.ProductDeleteDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductFormDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductUpdateFormDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductWishCancelDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductWishFormDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductWishResultDto;
-import com.team6.onandthefarmproductservice.vo.product.ProductDetailResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductQnAResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductReviewResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductWishResponse;
+import com.team6.onandthefarmproductservice.dto.product.*;
+import com.team6.onandthefarmproductservice.vo.product.*;
 
 public interface ProductService {
 	Long saveProduct(ProductFormDto productFormDto) throws IOException;
@@ -59,4 +50,22 @@ public interface ProductService {
     ProductDetailResponse findProductDetail(Long productId, Long userId);
 
     void updateStockAndSoldCount(Object productStockDto);
+
+    Boolean createProductQnA(UserQnaDto userQnaDto);
+
+    ProductQnAResultResponse findUserQna(Long userId, Integer pageNum);
+
+    Boolean updateUserQna(UserQnaUpdateDto userQnaUpdateDto);
+
+    Boolean deleteUserQna(Long productQnaId);
+
+    List<SellerRecentReviewResponse> findReviewMypage(Long sellerId);
+
+    List<SellerPopularProductResponse> findPopularProduct(Long sellerId);
+
+    SellerMypageResponse findSellerMypage(SellerMypageDto sellerMypageDto);
+
+    SellerProductQnaResponseResult findSellerQnA(Long sellerId, Integer pageNumber);
+
+    Boolean createQnaAnswer(SellerQnaDto sellerQnaDto);
 }

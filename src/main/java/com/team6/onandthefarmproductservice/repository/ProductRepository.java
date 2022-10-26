@@ -25,8 +25,8 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
 	List<Product> findProductsByCategoryNewest(@Param("categoryId") Long categoryId);
 
 //	List<Product> findBySeller(Long sellerId);
-//
-//	List<Product> findBySellerOrderByProductWishCountDesc(Long sellerId);
+
+	List<Product> findBySellerIdOrderByProductWishCountDesc(Long sellerId);
 
 	@Query("select p from Product p where p.sellerId=:sellerId and p.productStatus<>'selling'")
 	List<ProductVo> findNotSellingProduct(@Param("sellerId") Long sellerId);

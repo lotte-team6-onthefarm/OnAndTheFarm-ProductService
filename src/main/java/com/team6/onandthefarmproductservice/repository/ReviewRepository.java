@@ -9,6 +9,7 @@ import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
+
 	// @Query("select r from Review r join fetch r.product p join fetch p.category join fetch p.seller where r.product.productId =:productId order by r.reviewLikeCount DESC")
 	// List<Review> findReviewListByLikeCount(@Param("productId") Long productId);
 
@@ -17,7 +18,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 	//List<Review> findReviewsByProductOrderByReviewLikeCountDesc(Product product);
 
-//	List<Review> findBySellerOrderByReviewCreatedAtDesc(Long sellerId);
+	List<Review> findBySellerIdOrderByReviewCreatedAtDesc(Long sellerId);
 
 	Optional<Review> findReviewByOrderProductId(Long orderProductId);
 
