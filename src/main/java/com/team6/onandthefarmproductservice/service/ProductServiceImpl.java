@@ -33,7 +33,7 @@ import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
 import com.team6.onandthefarmproductservice.util.S3Upload;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientOrderProductIdResponse;
-import com.team6.onandthefarmproductservice.vo.review.ReviewableProductResponse;
+import com.team6.onandthefarmproductservice.vo.order.OrdersByUserResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -547,8 +547,8 @@ public class ProductServiceImpl implements ProductService {
 
 		List<ProductReviewResponse> productReviewResponses = new ArrayList<>();
 
-		List<ReviewableProductResponse> orders = orderServiceClient.findProductWithoutReview(userId);
-		for(ReviewableProductResponse o : orders){
+		List<OrdersByUserResponse> orders = orderServiceClient.findProductWithoutReview(userId);
+		for(OrdersByUserResponse o : orders){
 			List<OrderClientOrderProductIdResponse> orderProducts = orderServiceClient.findByOrdersId(o.getOrdersId());
 			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(o.getSellerId());
 
@@ -564,7 +564,7 @@ public class ProductServiceImpl implements ProductService {
 							.sellerShopName(sellerClientSellerDetailResponse.getSellerShopName())
 							.productId(orderProduct.getProductId())
 							.orderProductId(orderProduct.getOrderProductId())
-							.ordersDate(orderProduct.getOrdersDate())
+							.ordersDate(o.getOrdersDate())
 							.build();
 					productReviewResponses.add(productReviewResponse);
 				}
