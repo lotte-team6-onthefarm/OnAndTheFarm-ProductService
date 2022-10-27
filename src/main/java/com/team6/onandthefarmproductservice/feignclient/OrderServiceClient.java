@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.team6.onandthefarmproductservice.vo.order.OrderClientOrderProductIdResponse;
-import com.team6.onandthefarmproductservice.vo.review.ReviewableProductResponse;
+import com.team6.onandthefarmproductservice.vo.order.OrdersByUserResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "order-service")
 public interface OrderServiceClient {
 
 	@GetMapping("/api/user/orders/order-service/review-available/{user-no}")
-	List<ReviewableProductResponse> findProductWithoutReview(@PathVariable("user-no") Long userId);
+	List<OrdersByUserResponse> findProductWithoutReview(@PathVariable("user-no") Long userId);
 
 	@GetMapping("/api/user/orders/order-service/order-product/{orders-no}")
 	List<OrderClientOrderProductIdResponse> findByOrdersId(@PathVariable("orders-no") Long ordersId);

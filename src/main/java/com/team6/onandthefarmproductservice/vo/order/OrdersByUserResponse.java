@@ -1,4 +1,4 @@
-package com.team6.onandthefarmproductservice.vo.review;
+package com.team6.onandthefarmproductservice.vo.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewableProductResponse {
+public class OrdersByUserResponse {
 
 	private Long ordersId;
 	private Long sellerId;
+	private String ordersDate;
 }
