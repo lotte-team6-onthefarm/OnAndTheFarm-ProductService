@@ -20,5 +20,5 @@ public interface ProductQnaRepository extends CrudRepository<ProductQna,Long> {
     List<ProductQna> findBySellerId(Long sellerId);
 
     @Query("select q from ProductQna q where q.sellerId=:sellerId and q.productQnaStatus='waiting'")
-    List<ProductQnaVo> findBeforeAnswerProductQna(@Param("sellerId") Long sellerId);
+    List<ProductQna> findBeforeAnswerProductQna(@Param("sellerId") Long sellerId);
 }
