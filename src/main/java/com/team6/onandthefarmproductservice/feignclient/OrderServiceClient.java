@@ -20,7 +20,7 @@ public interface OrderServiceClient {
 	@GetMapping("/api/user/orders/order-service/order-product/{orders-no}")
 	List<OrderClientOrderProductIdResponse> findByOrdersId(@PathVariable("orders-no") Long ordersId);
 
-	@GetMapping("/api/user/orders/order-service/order-product/{order-product-no}")
+	@GetMapping("/api/user/orders/order-service/{order-product-no}")
 	OrderClientOrderProductIdResponse findProductIdByOrderProductId(@PathVariable("order-product-no") Long orderProductId);
 
 	@GetMapping("/api/user/orders/order-service/order-product/orders-list")
