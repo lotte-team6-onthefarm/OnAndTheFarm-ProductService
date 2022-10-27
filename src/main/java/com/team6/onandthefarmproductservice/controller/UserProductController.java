@@ -111,7 +111,7 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/{product-id}")
+	@GetMapping(value = "/detail/{product-id}")
 	@ApiOperation(value = "상품 단건 조회")
 	public ResponseEntity<ProductDetailResponse> findProductDetail(@ApiIgnore Principal principal, @PathVariable("product-id") Long productId) {
 
