@@ -6,6 +6,7 @@ import com.team6.onandthefarmproductservice.dto.product.OrderProductDto;
 import com.team6.onandthefarmproductservice.dto.product.ProductStockDto;
 import com.team6.onandthefarmproductservice.entity.Cart;
 import com.team6.onandthefarmproductservice.entity.Product;
+import com.team6.onandthefarmproductservice.entity.ProductQna;
 import com.team6.onandthefarmproductservice.entity.ReservedOrder;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.kafka.ProductOrderChannelAdapter;
@@ -70,15 +71,48 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
     }
 
     public List<ProductVo> findNotSellingProduct(Long sellerId){
-        return productRepository.findNotSellingProduct(sellerId);
+        List<ProductVo> productVoList = new ArrayList<>();
+
+        List<Product> products = productRepository.findNotSellingProduct(sellerId);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        for(Product product : products){
+            ProductVo productVo = modelMapper.map(product,ProductVo.class);
+            productVo.setCategoryId(product.getCategory().getCategoryId());
+            productVoList.add(productVo);
+        }
+
+        return productVoList;
     }
 
     public List<ProductVo> findSellingProduct(Long sellerId){
-        return productRepository.findSellingProduct(sellerId);
+        List<ProductVo> productVoList = new ArrayList<>();
+
+        List<Product> products =  productRepository.findSellingProduct(sellerId);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        for(Product product : products){
+            ProductVo productVo = modelMapper.map(product,ProductVo.class);
+            productVo.setCategoryId(product.getCategory().getCategoryId());
+            productVoList.add(productVo);
+        }
+
+        return productVoList;
     }
 
     public List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId){
-        return productQnaRepository.findBeforeAnswerProductQna(sellerId);
+        List<ProductQnaVo> productQnaVoList = new ArrayList<>();
+
+        List<ProductQna> productQnas = productQnaRepository.findBeforeAnswerProductQna(sellerId);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        for(ProductQna productQna : productQnas){
+            ProductQnaVo productQnaVo = modelMapper.map(productQna,ProductQnaVo.class);
+            productQnaVo.setProductId(productQna.getProduct().getProductId());
+            productQnaVoList.add(productQnaVo);
+        }
+
+        return productQnaVoList;
     }
 
     /**

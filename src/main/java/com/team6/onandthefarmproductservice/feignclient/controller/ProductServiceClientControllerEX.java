@@ -56,16 +56,16 @@ public class ProductServiceClientControllerEX {
      * @return
      */
     @GetMapping("/api/user/product/product-service/no-selling/{seller-no}")
-    List<ProductVo> findNotSellingProduct(Long sellerId){
+    List<ProductVo> findNotSellingProduct(@PathVariable("seller-no") Long sellerId){
         return productServiceClientService.findNotSellingProduct(sellerId);
     }
     @GetMapping("/api/user/product/product-service/selling/{seller-no}")
-    List<ProductVo> findSellingProduct(Long sellerId){
+    List<ProductVo> findSellingProduct(@PathVariable("seller-no") Long sellerId){
         return productServiceClientService.findSellingProduct(sellerId);
     }
 
     @GetMapping("/api/user/product/product-service/qna/{seller-no}")
-    List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId){
+    List<ProductQnaVo> findBeforeAnswerProductQna(@PathVariable("seller-no") Long sellerId){
         return productServiceClientService.findBeforeAnswerProductQna(sellerId);
     }
 
