@@ -1,11 +1,12 @@
 package com.team6.onandthefarmproductservice.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import com.team6.onandthefarmproductservice.dto.product.*;
+import com.team6.onandthefarmproductservice.entity.*;
+import com.team6.onandthefarmproductservice.vo.order.OrderClientSellerIdAndDateResponse;
+import com.team6.onandthefarmproductservice.vo.product.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.team6.onandthefarmproductservice.dto.product.ProductDeleteDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductFormDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductUpdateFormDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductWishCancelDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductWishFormDto;
-import com.team6.onandthefarmproductservice.dto.product.ProductWishResultDto;
-import com.team6.onandthefarmproductservice.entity.Cart;
-import com.team6.onandthefarmproductservice.entity.Category;
-import com.team6.onandthefarmproductservice.entity.Product;
-import com.team6.onandthefarmproductservice.entity.ProductImg;
-import com.team6.onandthefarmproductservice.entity.ProductQna;
-import com.team6.onandthefarmproductservice.entity.Review;
-import com.team6.onandthefarmproductservice.entity.Wish;
 import com.team6.onandthefarmproductservice.feignclient.OrderServiceClient;
 import com.team6.onandthefarmproductservice.feignclient.SellerServiceClient;
 import com.team6.onandthefarmproductservice.feignclient.UserServiceClient;
@@ -45,14 +33,7 @@ import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
 import com.team6.onandthefarmproductservice.util.S3Upload;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientOrderProductIdResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductDetailResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductImageResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductQnAResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductReviewResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductWishResponse;
-import com.team6.onandthefarmproductservice.vo.product.SellerClientSellerDetailResponse;
-import com.team6.onandthefarmproductservice.vo.review.ReviewableProductResponse;
+import com.team6.onandthefarmproductservice.vo.order.OrdersByUserResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,6 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 
 public class ProductServiceImpl implements ProductService {
 
+	private final int listNum = 5;
+	private final int pageContentNumber = 8;
 	private ProductRepository productRepository;
 	private CategoryRepository categoryRepository;
 	private ProductQnaRepository productQnaRepository;
@@ -564,8 +547,8 @@ public class ProductServiceImpl implements ProductService {
 
 		List<ProductReviewResponse> productReviewResponses = new ArrayList<>();
 
-		List<ReviewableProductResponse> orders = orderServiceClient.findProductWithoutReview(userId);
-		for(ReviewableProductResponse o : orders){
+		List<OrdersByUserResponse> orders = orderServiceClient.findProductWithoutReview(userId);
+		for(OrdersByUserResponse o : orders){
 			List<OrderClientOrderProductIdResponse> orderProducts = orderServiceClient.findByOrdersId(o.getOrdersId());
 			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(o.getSellerId());
 
@@ -581,7 +564,7 @@ public class ProductServiceImpl implements ProductService {
 							.sellerShopName(sellerClientSellerDetailResponse.getSellerShopName())
 							.productId(orderProduct.getProductId())
 							.orderProductId(orderProduct.getOrderProductId())
-							.ordersDate(orderProduct.getOrdersDate())
+							.ordersDate(o.getOrdersDate())
 							.build();
 					productReviewResponses.add(productReviewResponse);
 				}
@@ -593,17 +576,359 @@ public class ProductServiceImpl implements ProductService {
 
 	public void updateStockAndSoldCount(Object productStockDto){
 		HashMap<String,Object> productStock = (HashMap<String,Object>) productStockDto;
-		for(String key : productStock.keySet()){
-			Product product = productRepository.findById(Long.valueOf(String.valueOf(productStock.get(key)))).get();
-			// 상품 재고 차감
-			product.setProductTotalStock(product.getProductTotalStock()-(Integer)productStock.get(key));
-			// 상품 판매 count 증가
-			product.setProductSoldCount(product.getProductSoldCount()+1);
-			// 재고 차감 시 재고가 0일 경우 product status를 soldout으로 변경
-			if(product.getProductSoldCount()==0){
-				product.setProductStatus("soldout");
-			}
+		Long productId = Long.valueOf(String.valueOf(productStock.get("productId")));
+		Integer productQty = Integer.valueOf(String.valueOf(productStock.get("productQty")));
+
+		Product product = productRepository.findById(productId).get();
+		product.setProductTotalStock(product.getProductTotalStock()-productQty);
+		// 상품 판매 count 증가
+		product.setProductSoldCount(product.getProductSoldCount()+1);
+		// 재고 차감 시 재고가 0일 경우 product status를 soldout으로 변경
+		if(product.getProductSoldCount()==0){
+			product.setProductStatus("soldout");
 		}
 	}
 
+	@Override
+	public Boolean createProductQnA(UserQnaDto userQnaDto) {
+		Optional<Product> product = productRepository.findById(userQnaDto.getProductId());
+		log.info("product 정보  :  " + product.get().toString());
+		ProductQna productQna = ProductQna.builder()
+				.product(product.get())
+				.userId(userQnaDto.getUserId())
+				.productQnaContent(userQnaDto.getProductQnaContent())
+				.productQnaCreatedAt(dateUtils.transDate(env.getProperty("dateutils.format")))
+				.productQnaStatus("waiting")
+				.sellerId(product.get().getSellerId())
+				.build();
+		ProductQna newQna = productQnaRepository.save(productQna);
+		if (newQna == null) {
+			return Boolean.FALSE;
+		}
+		return Boolean.TRUE;
+	}
+
+	@Override
+	public ProductQnAResultResponse findUserQna(Long userId, Integer pageNum) {
+		ModelMapper modelMapper = new ModelMapper();
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+		List<ProductQnAResponse> responses = new ArrayList<>();
+
+		List<ProductQna> productQnas = productQnaRepository.findByUserId(userId);
+		UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(userId);
+
+		for (ProductQna productQna : productQnas) {
+			ProductQnAResponse response = modelMapper.map(productQna, ProductQnAResponse.class);
+			if(response.getProductQnaStatus().equals("deleted")) continue;
+			if(response.getProductQnaStatus().equals("completed")){
+				String answer =
+						productQnaAnswerRepository
+								.findByProductQna(productQna)
+								.getProductQnaAnswerContent();
+				response.setProductSellerAnswer(answer);
+			}
+			response.setUserName(userClientUserShortInfoResponse.getUserName());
+			response.setUserProfileImg(userClientUserShortInfoResponse.getUserProfileImg());
+			responses.add(response);
+		}
+
+		ProductQnAResultResponse resultResponse = new ProductQnAResultResponse();
+
+		responses.sort((o1, o2) -> {
+			int result = o2.getProductQnaCreatedAt().compareTo(o1.getProductQnaCreatedAt());
+			return result;
+		});
+
+		int startIndex = pageNum*pageContentNumber;
+
+		int size = responses.size();
+
+		if(size<startIndex+pageContentNumber){
+			resultResponse.setResponses(responses.subList(startIndex,size));
+			resultResponse.setCurrentPageNum(pageNum);
+			if(size%pageContentNumber!=0){
+				resultResponse.setTotalPageNum((size/pageContentNumber)+1);
+			}
+			else{
+				resultResponse.setTotalPageNum(size/pageContentNumber);
+			}
+			return resultResponse;
+		}
+
+		resultResponse.setResponses(responses.subList(startIndex,startIndex+pageContentNumber));
+		resultResponse.setCurrentPageNum(pageNum);
+		if(size%pageContentNumber!=0){
+			resultResponse.setTotalPageNum((size/pageContentNumber)+1);
+		}
+		else{
+			resultResponse.setTotalPageNum(size/pageContentNumber);
+		}
+		return resultResponse;
+	}
+
+	/**
+	 * 유저의 질의를 수정하는 메서드
+	 * @param userQnaUpdateDto
+	 * @return
+	 */
+	@Override
+	public Boolean updateUserQna(UserQnaUpdateDto userQnaUpdateDto) {
+		Optional<ProductQna> productQna = productQnaRepository.findById(userQnaUpdateDto.getProductQnaId());
+		productQna.get().setProductQnaContent(userQnaUpdateDto.getProductQnaContent());
+		productQna.get().setProductQnaModifiedAt(dateUtils.transDate(env.getProperty("dateutils.format")));
+		if (productQna.get().getProductQnaContent().equals(userQnaUpdateDto.getProductQnaContent())) {
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
+
+	@Override
+	public Boolean deleteUserQna(Long productQnaId) {
+		Optional<ProductQna> productQna = productQnaRepository.findById(productQnaId);
+		productQna.get().setProductQnaStatus("deleted");
+		if (productQna.get().getProductQnaStatus().equals("deleted")) {
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
+
+	/**
+     * 셀러의 마이페이지를 조회하는 메서드
+     * @param sellerMypageDto
+     * @return
+     */
+	@Override
+    public SellerMypageResponse findSellerMypage(SellerMypageDto sellerMypageDto){
+
+        SellerMypageResponse response = new SellerMypageResponse();
+
+        List<SellerRecentReviewResponse> reviews = findReviewMypage(sellerMypageDto.getSellerId());
+
+        List<SellerPopularProductResponse> popularProducts = findPopularProduct(sellerMypageDto.getSellerId());
+
+        response.setReviews(reviews);
+        response.setPopularProducts(popularProducts);
+
+//        List<OrderProduct> orderProducts = orderProductRepository.findBySellerIdAndOrderProductDateBetween(
+//                sellerMypageDto.getSellerId(),
+//                sellerMypageDto.getStartDate(),
+//                sellerMypageDto.getEndDate());
+
+        /*
+                해당 기간 총 수익
+         */
+        int totalPrice = 0; // 기간 총 수익
+
+        /*
+                일간 수익 조회
+         */
+        String startDate = sellerMypageDto.getStartDate().substring(0,10);
+        String endDate = sellerMypageDto.getEndDate().substring(0,10);
+        String nextDate = startDate;
+
+        List<Integer> dayPrices = new ArrayList<>();
+        Set<Long> orderList = new HashSet<>(); // 기간 총 주문을 담은 set
+        List<Integer> dayOrderCounts = new ArrayList<>();
+
+        while(true){
+            int dayPrice = 0;
+            int dayOrderCount = 0;
+            List<OrderClientSellerIdAndDateResponse> orderProductList =
+                    orderServiceClient.findBySellerIdAndOrderProductDateStartingWith(
+                            sellerMypageDto.getSellerId(), nextDate);
+            for(OrderClientSellerIdAndDateResponse orderProduct : orderProductList){
+                if(!orderList.contains(orderProduct.getOrdersId())){
+                    orderList.add(orderProduct.getOrdersId());
+                    dayOrderCount++;
+                }
+                dayPrice+=orderProduct.getOrderProductPrice()*orderProduct.getOrderProductQty();
+            }
+            dayPrices.add(dayPrice);
+            dayOrderCounts.add(dayOrderCount);
+            nextDate = dateUtils.nextDate(nextDate);
+            if(nextDate.equals(endDate)){
+                break;
+            }
+        }
+
+        int dayPrice = 0;
+        int dayOrderCount = 0;
+		List<OrderClientSellerIdAndDateResponse> orderProductList =
+				orderServiceClient.findBySellerIdAndOrderProductDateStartingWith(
+                        sellerMypageDto.getSellerId(), nextDate);
+        for(OrderClientSellerIdAndDateResponse orderProduct : orderProductList){
+            if(!orderList.contains(orderProduct.getOrdersId())){
+                orderList.add(orderProduct.getOrdersId());
+                dayOrderCount++;
+            }
+            dayPrice+=orderProduct.getOrderProductPrice()*orderProduct.getOrderProductQty();
+        }
+        dayPrices.add(dayPrice);
+        dayOrderCounts.add(dayOrderCount);
+        for(Integer price : dayPrices){
+            totalPrice += price;
+        }
+
+        response.setDayPrices(dayPrices);
+        response.setTotalPrice(totalPrice);
+        response.setTotalOrderCount(orderList.size());
+        response.setDayOrderCount(dayOrderCounts);
+        return response;
+    }
+
+    /**
+     * 셀러 메인페이지에 최신 리뷰 4개 보여줄 메서드
+     * @param sellerId
+     * @return
+     */
+	@Override
+    public List<SellerRecentReviewResponse> findReviewMypage(Long sellerId){
+        List<SellerRecentReviewResponse> responses = new ArrayList<>();
+
+        List<Review> reviews = reviewRepository.findBySellerIdOrderByReviewCreatedAtDesc(sellerId);
+        if(reviews.size()<listNum){
+            for(Review review : reviews){
+                if(review.getReviewStatus().equals("deleted")) continue;
+                Product product = review.getProduct();
+                SellerRecentReviewResponse response = SellerRecentReviewResponse.builder()
+                        .productImg(product.getProductMainImgSrc())
+                        .productName(product.getProductName())
+                        .reviewContent(review.getReviewContent())
+                        .reviewRate(review.getReviewRate())
+                        .reviewLikeCount(review.getReviewLikeCount())
+                        .build();
+                responses.add(response);
+            }
+        }
+        else{
+            for(Review review : reviews.subList(0,listNum)){
+                if(review.getReviewStatus().equals("deleted")) continue;
+                Product product = review.getProduct();
+                SellerRecentReviewResponse response = SellerRecentReviewResponse.builder()
+                        .productImg(product.getProductMainImgSrc())
+                        .productName(product.getProductName())
+                        .reviewContent(review.getReviewContent())
+                        .reviewRate(review.getReviewRate())
+                        .reviewLikeCount(review.getReviewLikeCount())
+                        .build();
+                responses.add(response);
+            }
+        }
+
+
+        return responses;
+    }
+
+    /**
+     * 셀러 메인페이지에 찜순 상품 4개 보여줄 메서드
+     * @param sellerId
+     * @return
+     */
+	@Override
+    public List<SellerPopularProductResponse> findPopularProduct(Long sellerId){
+        List<SellerPopularProductResponse> responses = new ArrayList<>();
+
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        List<Product> products = productRepository.findBySellerIdOrderByProductWishCountDesc(sellerId);
+
+        for(Product product : products){
+            SellerPopularProductResponse response =
+                    modelMapper.map(product,SellerPopularProductResponse.class);
+            responses.add(response);
+        }
+        if(responses.size()<listNum){
+            return responses;
+        }
+        return responses.subList(0,listNum);
+    }
+
+    /**
+     * 셀러가 가진 QNA 조회
+     * @param sellerId
+     * @return
+     */
+	@Override
+    public SellerProductQnaResponseResult findSellerQnA(Long sellerId, Integer pageNumber){
+        SellerProductQnaResponseResult sellerProductQnaResponseResult = new SellerProductQnaResponseResult();
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+		List<ProductQna> productQnas = productQnaRepository.findBySellerId(sellerId);
+        List<SellerProductQnaResponse> sellerProductQnaResponses = new ArrayList<>();
+        for(ProductQna productQna : productQnas){
+            SellerProductQnaResponse response
+                    = modelMapper.map(productQna,SellerProductQnaResponse.class);
+            Product product
+                    = productRepository.findById(productQna.getProduct().getProductId()).get();
+
+            Long userId = productQna.getUserId();
+			UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(userId);
+
+            response.setProductImg(product.getProductMainImgSrc());
+            response.setProductName(product.getProductName());
+            response.setUserName(userClientUserShortInfoResponse.getUserName());
+            response.setUserProfileImg(userClientUserShortInfoResponse.getUserProfileImg());
+            if(productQna.getProductQnaStatus().equals("completed")){
+                String answer = productQnaAnswerRepository
+                        .findByProductQna(productQna)
+                        .getProductQnaAnswerContent();
+                response.setProductSellerAnswer(answer);
+            }
+            sellerProductQnaResponses.add(response);
+        }
+
+        sellerProductQnaResponses.sort((o1, o2) -> {
+            int result = o2.getProductQnaCreatedAt().compareTo(o1.getProductQnaCreatedAt());
+            return result;
+        });
+
+        int startIndex = pageNumber*pageContentNumber;
+
+        int size = sellerProductQnaResponses.size();
+
+        if(size<startIndex+pageContentNumber) {
+            sellerProductQnaResponseResult
+                    .setSellerProductQnaResponseList(sellerProductQnaResponses.subList(startIndex, size));
+        }
+        else{
+            sellerProductQnaResponseResult
+                    .setSellerProductQnaResponseList(
+                            sellerProductQnaResponses.subList(startIndex,startIndex+pageContentNumber));
+        }
+        sellerProductQnaResponseResult.setCurrentPageNum(pageNumber);
+        if(size%pageContentNumber!=0){
+            sellerProductQnaResponseResult.setTotalPageNum((size/pageContentNumber)+1);
+        }
+        else{
+            sellerProductQnaResponseResult.setTotalPageNum(size/pageContentNumber);
+        }
+        return sellerProductQnaResponseResult;
+    }
+
+    /**
+     * 답변 생성하는 메서드
+     * status
+     * waiting(qna0) : 답변 대기
+     * completed(qna1) : 답변 완료
+     * deleted(qna2) : qna 삭제
+     * @param sellerQnaDto
+     */
+	@Override
+    public Boolean createQnaAnswer(SellerQnaDto sellerQnaDto){
+        Optional<ProductQna> qna = productQnaRepository.findById(Long.valueOf(sellerQnaDto.getProductQnaId()));
+        qna.get().setProductQnaStatus("completed");
+        ProductQnaAnswer productQnaAnswer = ProductQnaAnswer.builder()
+                .productQna(qna.get())
+                .productQnaAnswerContent(sellerQnaDto.getProductQnaAnswerContent())
+                .productQnaAnswerCreatedAt(dateUtils.transDate(env.getProperty("dateutils.format")))
+                .build();
+        ProductQnaAnswer qnaAnswer = productQnaAnswerRepository.save(productQnaAnswer);
+        if(qnaAnswer==null){
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
 }

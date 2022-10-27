@@ -8,6 +8,6 @@ import com.team6.onandthefarmproductservice.vo.product.SellerClientSellerDetailR
 
 @FeignClient(name = "member-service", contextId = "member-service-seller")
 public interface SellerServiceClient {
-	@GetMapping("/api/seller/seller/member-service/{seller-no}")
+	@GetMapping("/api/seller/members/member-service/{seller-no}")
 	SellerClientSellerDetailResponse findBySellerId(@PathVariable("seller-no") Long sellerId);
 }
