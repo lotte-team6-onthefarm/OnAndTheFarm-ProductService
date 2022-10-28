@@ -12,7 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductWishResponse {
-
     private Long wistId;
     private Long productId;
     private String productName;
@@ -21,5 +20,4 @@ public class ProductWishResponse {
     private String productDetail;
     private String productOriginPlace;
     private String productDetailShort;
-
 }

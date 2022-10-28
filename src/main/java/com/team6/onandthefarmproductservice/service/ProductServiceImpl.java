@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.team6.onandthefarmproductservice.dto.product.*;
 import com.team6.onandthefarmproductservice.entity.*;
+import com.team6.onandthefarmproductservice.vo.PageVo;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientSellerIdAndDateResponse;
 import com.team6.onandthefarmproductservice.vo.product.*;
 import org.modelmapper.ModelMapper;
@@ -315,7 +316,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -326,7 +333,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -337,7 +350,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -348,7 +367,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, 0, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(0)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -359,8 +384,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -371,7 +401,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -382,7 +418,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -393,7 +435,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -404,7 +452,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -415,7 +469,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -426,7 +486,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -437,7 +503,13 @@ public class ProductServiceImpl implements ProductService {
 		int totalPage = productList.getTotalPages();
 		Long totalElements = productList.getTotalElements();
 
-		return setProductSelectResponse(productList, userId, totalPage, pageNumber, totalElements);
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+
+		return setProductSelectResponse(productList, userId, pageVo);
 	}
 
 	@Override
@@ -497,16 +569,14 @@ public class ProductServiceImpl implements ProductService {
 	 * @param productList, userId
 	 * @return List<ProductSelectionResponse>
 	 */
-	private List<ProductSelectionResponse> setProductSelectResponse(Page<Product> productList, Long userId, Integer totalPage, Integer nowPage, Long totalElements){
+	private List<ProductSelectionResponse> setProductSelectResponse(Page<Product> productList, Long userId, PageVo pageVo){
 		List<ProductSelectionResponse> productResponseList = new ArrayList<>();
 
 		for(Product p : productList) {
 			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(p.getSellerId());
 
 			ProductSelectionResponse pResponse = new ProductSelectionResponse(p, sellerClientSellerDetailResponse);
-			pResponse.setTotalPage(totalPage);
-			pResponse.setNowPage(nowPage);
-			pResponse.setTotalElement(totalElements);
+			pResponse.setPageVo(pageVo);
 
 			List<Review> reviewList = reviewRepository.findReviewByProduct(p);
 			pResponse.setProductReviewCount(reviewList.size());
