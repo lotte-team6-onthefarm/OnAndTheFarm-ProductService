@@ -1,6 +1,7 @@
 package com.team6.onandthefarmproductservice.vo.product;
 
 import com.team6.onandthefarmproductservice.entity.Product;
+import com.team6.onandthefarmproductservice.vo.PageVo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,9 +44,7 @@ public class ProductSelectionResponse {
 	private Boolean productCartStatus;
 	private Boolean productWishStatus;
 	private Double reviewRate;
-	private Integer totalPage;
-	private Integer nowPage;
-	private Long totalElement;
+	private PageVo pageVo;
 
 	public ProductSelectionResponse(Product product, SellerClientSellerDetailResponse sellerClientSellerDetailResponse){
 		this.productId = product.getProductId();
