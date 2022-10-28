@@ -27,7 +27,7 @@ public class SnsServiceClientController {
         return snsServiceClientService.findWishProductListByMember(memberId);
     }
 
-    @GetMapping("/api/seller/product/product-service/product/{seller-no}")
+    @GetMapping("/api/seller/product/product-service/product/list/{seller-no}")
     List<ProductVo> findBySellerId(@PathVariable("seller-no") Long sellerId){
         return snsServiceClientService.findBySellerId(sellerId);
     }
