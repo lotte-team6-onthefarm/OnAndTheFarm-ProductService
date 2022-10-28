@@ -9,9 +9,13 @@ import com.team6.onandthefarmproductservice.feignclient.service.ProductServiceCl
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.service.ProductService;
+import com.team6.onandthefarmproductservice.vo.WishVo;
+
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -131,5 +135,16 @@ public class ProductServiceClientControllerEX {
     public ResponseEntity<Void> cancelOrderAdjustment(@PathVariable Long id) {
         productServiceClientService.cancelOrder(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    //member Id로 wish-list를 불러오는 메서드
+    @GetMapping("/api/user/product/product-service/wish-list/{user-no}")
+    public List<WishVo> findWishListByMemberId(PageRequest pageRequest, @PathVariable("user-no")Long memberId){
+        return productServiceClientService.getWishListByMemberId(pageRequest, memberId);
+    }
+    //product Id로 product 불러오는 메서드
+    @GetMapping("/api/user/product/product-service/product/{product-no}")
+    public ProductVo findProductByProductId(@PathVariable("product-no") Long productId){
+        return productServiceClientService.getProductVoByProductId(productId);
     }
 }
