@@ -239,12 +239,54 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductWishResponse> getWishList(Long userId) {
+	public ProductWishResult getWishList(Long userId, Integer pageNumber) {
+
+		ProductWishResult productWishResult = new ProductWishResult();
 
 		List<Wish> wishList =  productWishRepository.findWishListByUserId(userId);
+		int startIndex = pageNumber * pageContentNumber;
+		int size = wishList.size();
 
+		List<ProductWishResponse> productInfos = getWishListPagination(size, startIndex, wishList);
+
+		productWishResult.setProductWishResponseList(productInfos);
+		productWishResult.setCurrentPageNum(pageNumber);
+		productWishResult.setTotalElementNum(size);
+		if(size%pageContentNumber==0){
+			productWishResult.setTotalPageNum(size/pageContentNumber);
+		}
+		else{
+			productWishResult.setTotalPageNum((size/pageContentNumber)+1);
+		}
+
+		return productWishResult;
+	}
+
+	public List<ProductWishResponse> getWishListPagination(int size, int startIndex, List<Wish> wishList){
 		List<ProductWishResponse> productInfos = new ArrayList<>();
-		for(Wish w : wishList){
+
+		if(size < startIndex){
+			return productInfos;
+		}
+
+		if (size < startIndex + pageContentNumber) {
+			for (Wish w : wishList.subList(startIndex, size)) {
+				ProductWishResponse productWishResponse = ProductWishResponse.builder()
+						.wistId(w.getWishId())
+						.productId(w.getProduct().getProductId())
+						.productName(w.getProduct().getProductName())
+						.productMainImgSrc(w.getProduct().getProductMainImgSrc())
+						.productDetail(w.getProduct().getProductDetail())
+						.productDetailShort(w.getProduct().getProductDetailShort())
+						.productOriginPlace(w.getProduct().getProductOriginPlace())
+						.productPrice(w.getProduct().getProductPrice())
+						.build();
+
+				productInfos.add(productWishResponse);
+			}
+			return productInfos;
+		}
+		for (Wish w : wishList.subList(startIndex, startIndex + pageContentNumber)) {
 			ProductWishResponse productWishResponse = ProductWishResponse.builder()
 					.wistId(w.getWishId())
 					.productId(w.getProduct().getProductId())
@@ -258,7 +300,6 @@ public class ProductServiceImpl implements ProductService {
 
 			productInfos.add(productWishResponse);
 		}
-
 		return productInfos;
 	}
 
@@ -543,10 +584,11 @@ public class ProductServiceImpl implements ProductService {
 	 * @return List<ProductReviewResponse>
 	 */
 	@Override
-	public List<ProductReviewResponse> getProductsWithoutReview(Long userId) {
+	public ProductReviewResult getProductsWithoutReview(Long userId, Integer pageNumber) {
+
+		ProductReviewResult productReviewResult = new ProductReviewResult();
 
 		List<ProductReviewResponse> productReviewResponses = new ArrayList<>();
-
 		List<OrdersByUserResponse> orders = orderServiceClient.findProductWithoutReview(userId);
 		for(OrdersByUserResponse o : orders){
 			List<OrderClientOrderProductIdResponse> orderProducts = orderServiceClient.findByOrdersId(o.getOrdersId());
@@ -571,7 +613,40 @@ public class ProductServiceImpl implements ProductService {
 			}
 		}
 
-		return productReviewResponses;
+		int startIndex = pageNumber * pageContentNumber;
+		int size = productReviewResponses.size();
+
+		List<ProductReviewResponse> pagedProductReviewResponses = getReviewableProductPagination(size, startIndex, productReviewResponses);
+		productReviewResult.setProductReviewResponseList(pagedProductReviewResponses);
+		productReviewResult.setCurrentPageNum(pageNumber);
+		productReviewResult.setTotalElementNum(size);
+		if(size%pageContentNumber==0){
+			productReviewResult.setTotalPageNum(size/pageContentNumber);
+		}
+		else{
+			productReviewResult.setTotalPageNum((size/pageContentNumber)+1);
+		}
+
+		return productReviewResult;
+	}
+
+	public List<ProductReviewResponse> getReviewableProductPagination(int size, int startIndex, List<ProductReviewResponse> productList){
+		List<ProductReviewResponse> productReviewResponseList = new ArrayList<>();
+
+		if(size < startIndex){
+			return productReviewResponseList;
+		}
+
+		if (size < startIndex + pageContentNumber) {
+			for (ProductReviewResponse product : productList.subList(startIndex, size)) {
+				productReviewResponseList.add(product);
+			}
+			return productReviewResponseList;
+		}
+		for (ProductReviewResponse product : productList.subList(startIndex, startIndex + pageContentNumber)) {
+			productReviewResponseList.add(product);
+		}
+		return productReviewResponseList;
 	}
 
 	public void updateStockAndSoldCount(Object productStockDto){
