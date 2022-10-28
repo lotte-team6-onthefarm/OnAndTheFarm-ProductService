@@ -309,7 +309,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getAllProductListOrderByNewest(Long userId, Integer pageNumber){
+	public ProductSelectionResponseResult getAllProductListOrderByNewest(Long userId, Integer pageNumber){
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList = productPagingRepository.findAllProductOrderByNewest(pageRequest);
@@ -326,7 +326,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductsListByHighPrice(Long userId, Integer pageNumber) {
+	public ProductSelectionResponseResult getProductsListByHighPrice(Long userId, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductListByHighPrice(pageRequest);
@@ -343,7 +343,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductsListByLowPrice(Long userId, Integer pageNumber) {
+	public ProductSelectionResponseResult getProductsListByLowPrice(Long userId, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").ascending());
 
 		Page<Product> productList =  productPagingRepository.findProductListByLowPrice(pageRequest);
@@ -360,7 +360,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getMainProductsBySoldCount(Long userId){
+	public ProductSelectionResponseResult getMainProductsBySoldCount(Long userId){
 		PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("productSoldCount").descending());
 
 		Page<Product> productList = productPagingRepository.findProductBySoldCount(pageRequest);
@@ -377,7 +377,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductsBySoldCount(Long userId, Integer pageNumber) {
+	public ProductSelectionResponseResult getProductsBySoldCount(Long userId, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productSoldCount").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductBySoldCount(pageRequest);
@@ -394,7 +394,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
+	public ProductSelectionResponseResult getProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductBySellerNewest(pageRequest, sellerId);
@@ -411,7 +411,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductListByCategoryNewest(Long userId, String category, Integer pageNumber) {
+	public ProductSelectionResponseResult getProductListByCategoryNewest(Long userId, String category, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductsByCategoryNewest(pageRequest, category);
@@ -428,7 +428,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductListByCategoryHighest(Long userId, String category, Integer pageNumber) {
+	public ProductSelectionResponseResult getProductListByCategoryHighest(Long userId, String category, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductByCategoryHighest(pageRequest, category);
@@ -445,7 +445,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductListByCategoryLowest(Long userId, String category, Integer pageNumber) {
+	public ProductSelectionResponseResult getProductListByCategoryLowest(Long userId, String category, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").ascending());
 
 		Page<Product> productList =  productPagingRepository.findProductByCategoryLowest(pageRequest, category);
@@ -462,7 +462,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getProductsByCategorySoldCount(Long userId, String category, Integer pageNumber){
+	public ProductSelectionResponseResult getProductsByCategorySoldCount(Long userId, String category, Integer pageNumber){
 		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productSoldCount").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductByCategorySoldCount(pageRequest, category);
@@ -479,7 +479,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getSellingProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
+	public ProductSelectionResponseResult getSellingProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findSellingProductBySellerNewest(pageRequest, sellerId);
@@ -496,7 +496,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductSelectionResponse> getPauseProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
+	public ProductSelectionResponseResult getPauseProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findPauseProductBySellerNewest(pageRequest, sellerId);
@@ -569,14 +569,13 @@ public class ProductServiceImpl implements ProductService {
 	 * @param productList, userId
 	 * @return List<ProductSelectionResponse>
 	 */
-	private List<ProductSelectionResponse> setProductSelectResponse(Page<Product> productList, Long userId, PageVo pageVo){
+	private ProductSelectionResponseResult setProductSelectResponse(Page<Product> productList, Long userId, PageVo pageVo){
 		List<ProductSelectionResponse> productResponseList = new ArrayList<>();
 
 		for(Product p : productList) {
 			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(p.getSellerId());
 
 			ProductSelectionResponse pResponse = new ProductSelectionResponse(p, sellerClientSellerDetailResponse);
-			pResponse.setPageVo(pageVo);
 
 			List<Review> reviewList = reviewRepository.findReviewByProduct(p);
 			pResponse.setProductReviewCount(reviewList.size());
@@ -600,11 +599,14 @@ public class ProductServiceImpl implements ProductService {
 					pResponse.setProductCartStatus(true);
 				}
 			}
-
 			productResponseList.add(pResponse);
 		}
+		ProductSelectionResponseResult productSelectionResponseResult = ProductSelectionResponseResult.builder()
+				.productSelectionResponses(productResponseList)
+				.pageVo(pageVo)
+				.build();
 
-		return productResponseList;
+		return productSelectionResponseResult;
 	}
 
 	/**

@@ -24,6 +24,7 @@ import com.team6.onandthefarmproductservice.vo.product.ProductDetailResponse;
 import com.team6.onandthefarmproductservice.vo.product.ProductQnAInfoResponse;
 import com.team6.onandthefarmproductservice.vo.product.ProductQnAResponse;
 import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponseResult;
 import com.team6.onandthefarmproductservice.vo.product.ProductWishCancelRequest;
 import com.team6.onandthefarmproductservice.vo.product.ProductWishFormRequest;
 
@@ -133,7 +134,7 @@ public class UserProductController {
 
 	@GetMapping(value = "/list/all/newest/{page-no}")
 	@ApiOperation(value = "모든 상품 최신순 조회")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getAllProductListOrderByNewest(
+	public ResponseEntity<BaseResponse<ProductSelectionResponseResult>> getAllProductListOrderByNewest(
 			@ApiIgnore Principal principal,
 			@PathVariable("page-no") String pageNumber) {
 
@@ -142,7 +143,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getAllProductListOrderByNewest(userId, Integer.valueOf(pageNumber));
+		ProductSelectionResponseResult products = productService.getAllProductListOrderByNewest(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -164,7 +165,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsListByHighPrice(userId,
+		ProductSelectionResponseResult products = productService.getProductsListByHighPrice(userId,
 				Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -187,7 +188,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsListByLowPrice(userId, Integer.valueOf(pageNumber));
+		ProductSelectionResponseResult products = productService.getProductsListByLowPrice(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -207,7 +208,7 @@ public class UserProductController {
 			String [] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getMainProductsBySoldCount(userId);
+		ProductSelectionResponseResult products = productService.getMainProductsBySoldCount(userId);
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("getting main view products by sold count")
@@ -228,7 +229,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsBySoldCount(userId, Integer.valueOf(pageNumber));
+		ProductSelectionResponseResult products = productService.getProductsBySoldCount(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -250,7 +251,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListBySellerNewest(userId, sellerId,
+		ProductSelectionResponseResult products = productService.getProductListBySellerNewest(userId, sellerId,
 				Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -273,7 +274,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryNewest(userId, category,
+		ProductSelectionResponseResult products = productService.getProductListByCategoryNewest(userId, category,
 				Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -296,7 +297,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryHighest(userId, category, Integer.valueOf(pageNumber));
+		ProductSelectionResponseResult products = productService.getProductListByCategoryHighest(userId, category, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -318,7 +319,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductListByCategoryLowest(userId, category, Integer.valueOf(pageNumber));
+		ProductSelectionResponseResult products = productService.getProductListByCategoryLowest(userId, category, Integer.valueOf(pageNumber));
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("getting lowest products by category completed")
@@ -339,7 +340,7 @@ public class UserProductController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ProductSelectionResponse> products = productService.getProductsByCategorySoldCount(userId, category, Integer.valueOf(pageNumber));
+		ProductSelectionResponseResult products = productService.getProductsByCategorySoldCount(userId, category, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
