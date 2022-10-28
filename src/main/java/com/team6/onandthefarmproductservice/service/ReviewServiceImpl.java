@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -192,7 +193,7 @@ public class ReviewServiceImpl implements ReviewService {
 		// List<Review> reviews = reviewRepository.findReviewsByProductOrderByReviewLikeCountDesc(product);
 		List<ReviewSelectionResponse> reviewResponses = new ArrayList<>();
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewLikeCount").descending());
-		List<Review> reviews = reviewPagingRepository.findReviewListByLikeCount(pageRequest, productId);
+		Page<Review> reviews = reviewPagingRepository.findReviewListByLikeCount(pageRequest, productId);
 		for (Review review : reviews) {
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse
 					.builder()
@@ -206,6 +207,9 @@ public class ReviewServiceImpl implements ReviewService {
 					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
 					.isMyReview(false)
 					.isAvailableUp(true)
+					.totalPage(reviews.getTotalPages())
+					.nowPage(pageNumber)
+					.totalElement(reviews.getTotalElements())
 					.build();
 
 			if(review.getUserId().equals(userId)){
@@ -224,7 +228,7 @@ public class ReviewServiceImpl implements ReviewService {
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 
-		List<Review> reviews = reviewPagingRepository.findReviewListByNewest(pageRequest, productId);
+		Page<Review> reviews = reviewPagingRepository.findReviewListByNewest(pageRequest, productId);
 
 		for (Review review : reviews) {
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse
@@ -239,6 +243,9 @@ public class ReviewServiceImpl implements ReviewService {
 					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
 					.isMyReview(false)
 					.isAvailableUp(true)
+					.totalPage(reviews.getTotalPages())
+					.nowPage(pageNumber)
+					.totalElement(reviews.getTotalElements())
 					.build();
 
 			if(review.getUserId() == userId){
@@ -256,7 +263,7 @@ public class ReviewServiceImpl implements ReviewService {
 	public List<ReviewSelectionResponse> getReviewBySellerNewest(Long sellerId, Integer pageNumber) {
 
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
-		List<Review> reviews = reviewPagingRepository.findReviewListBySeller(pageRequest, sellerId);
+		Page<Review> reviews = reviewPagingRepository.findReviewListBySeller(pageRequest, sellerId);
 
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 
@@ -273,6 +280,9 @@ public class ReviewServiceImpl implements ReviewService {
 					.productMainImgSrc(review.getProduct().getProductMainImgSrc())
 					.productName(review.getProduct().getProductName())
 					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
+					.totalPage(reviews.getTotalPages())
+					.nowPage(pageNumber)
+					.totalElement(reviews.getTotalElements())
 					.build();
 			reviewResponse.add(reviewSelectionResponse);
 		}
@@ -282,7 +292,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 	public List<ReviewSelectionResponse> getMyReview(Long userId, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
-		List<Review> reviews = reviewPagingRepository.findReviewListByUser(pageRequest, userId);
+		Page<Review> reviews = reviewPagingRepository.findReviewListByUser(pageRequest, userId);
 
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 
@@ -300,6 +310,9 @@ public class ReviewServiceImpl implements ReviewService {
 					.productName(review.getProduct().getProductName())
 					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
 					.isAvailableUp(true)
+					.totalPage(reviews.getTotalPages())
+					.nowPage(pageNumber)
+					.totalElement(reviews.getTotalElements())
 					.build();
 			Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByUser(userId, review.getReviewId());
 			if(reviewLike.isPresent()){

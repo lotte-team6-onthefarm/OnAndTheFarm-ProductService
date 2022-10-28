@@ -54,4 +54,8 @@ public interface ProductPagingRepository extends PagingAndSortingRepository<Prod
 	@Query(value = "select p from Product p join fetch p.category where p.category.categoryName =:category",
 			countQuery = "select count(p) from Product p")
 	Page<Product> findProductByCategorySoldCount(PageRequest pageRequest, @Param("category") String category);
+
+
+
+
 }
