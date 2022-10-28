@@ -26,5 +26,8 @@ public class ReviewSelectionResponse {
 	private String userName;
 	private Boolean isAvailableUp;
 	private Boolean isMyReview;
+	private Integer totalPage;
+	private Integer nowPage;
+	private Long totalElement;
 
 }
