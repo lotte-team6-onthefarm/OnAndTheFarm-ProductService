@@ -44,7 +44,6 @@ public class ProductSelectionResponse {
 	private Boolean productCartStatus;
 	private Boolean productWishStatus;
 	private Double reviewRate;
-	private PageVo pageVo;
 
 	public ProductSelectionResponse(Product product, SellerClientSellerDetailResponse sellerClientSellerDetailResponse){
 		this.productId = product.getProductId();
