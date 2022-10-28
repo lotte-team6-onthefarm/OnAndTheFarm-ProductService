@@ -28,7 +28,7 @@ public interface ProductServiceClientServiceEX {
 
     void cancelOrder(Long id);
 
-    List<WishVo> getWishListByMemberId(PageRequest pageRequest, Long memberId);
+    List<WishVo> getWishListByMemberId(Integer pageNumber, PageRequest pageRequest, Long memberId);
 
     ProductVo getProductVoByProductId(Long productId);
 }

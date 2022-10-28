@@ -193,7 +193,7 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         log.info("Cancel Stock :" + id);
     }
 
-    public List<WishVo> getWishListByMemberId(PageRequest pageRequest, Long memberId){
+    public List<WishVo> getWishListByMemberId(Integer pageNumber, PageRequest pageRequest, Long memberId){
         Page<Wish> wishs = productWishRepository.findWishListPageByUserId(pageRequest, memberId);
         List<WishVo> wishVos = new ArrayList<>();
         for (Wish wish : wishs) {
@@ -202,6 +202,9 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
                     .productId(wish.getProduct().getProductId())
                     .userId(wish.getUserId())
                     .wishStatus(wish.getWishStatus())
+                    .totalPage(wishs.getTotalPages())
+                    .nowPage(pageNumber)
+                    .totalElement(wishs.getTotalElements())
                     .build();
             wishVos.add(wishVo);
         }
