@@ -17,7 +17,7 @@ public interface ProductService {
 
     List<Long> cancelProductFromWishList(ProductWishCancelDto productWishCancelDto);
 
-    List<ProductWishResponse> getWishList(Long userId);
+    ProductWishResult getWishList(Long userId, Integer pageNumber);
 
     List<ProductSelectionResponse> getAllProductListOrderByNewest(Long userId, Integer pageNumber);
 
@@ -45,7 +45,7 @@ public interface ProductService {
 
     List<ProductQnAResponse> findProductQnAList(Long productId);
 
-	List<ProductReviewResponse> getProductsWithoutReview(Long userId);
+    ProductReviewResult getProductsWithoutReview(Long userId, Integer pageNumber);
 	
     ProductDetailResponse findProductDetail(Long productId, Long userId);
 

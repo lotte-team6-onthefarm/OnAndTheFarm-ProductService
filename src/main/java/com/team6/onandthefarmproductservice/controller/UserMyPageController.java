@@ -30,7 +30,7 @@ public class UserMyPageController {
 
     @GetMapping("/wish")
     @ApiOperation(value = "사용자 별 위시리스트 조회")
-    public ResponseEntity<BaseResponse<List<ProductWishResponse>>> getWishList(@ApiIgnore Principal principal) {
+    public ResponseEntity<BaseResponse<ProductWishResult>> getWishList(@ApiIgnore Principal principal, @RequestParam Integer pageNumber) {
 
         if(principal == null){
             BaseResponse baseResponse = BaseResponse.builder()
@@ -43,7 +43,7 @@ public class UserMyPageController {
         String[] principalInfo = principal.getName().split(" ");
         Long userId = Long.parseLong(principalInfo[0]);
 
-        List<ProductWishResponse> productInfos = productService.getWishList(userId);
+        ProductWishResult productInfos = productService.getWishList(userId, pageNumber);
 
         BaseResponse baseResponse = BaseResponse.builder()
                 .httpStatus(HttpStatus.CREATED)
@@ -56,8 +56,8 @@ public class UserMyPageController {
 
     @GetMapping("/review")
     @ApiOperation(value = "사용자 별로 작성 가능한 리뷰 조회")
-    public ResponseEntity<BaseResponse<List<ProductReviewResponse>>> getWritableReviewList(
-            @ApiIgnore Principal principal) {
+    public ResponseEntity<BaseResponse<ProductReviewResult>> getWritableReviewList(
+            @ApiIgnore Principal principal, @RequestParam Integer pageNumber) {
 
         if(principal == null){
             BaseResponse baseResponse = BaseResponse.builder()
@@ -70,7 +70,7 @@ public class UserMyPageController {
         String[] principalInfo = principal.getName().split(" ");
         Long userId = Long.parseLong(principalInfo[0]);
 
-        List<ProductReviewResponse> productsWithoutReview = productService.getProductsWithoutReview(userId);
+        ProductReviewResult productsWithoutReview = productService.getProductsWithoutReview(userId, pageNumber);
 
         BaseResponse baseResponse = BaseResponse.builder()
                 .httpStatus(HttpStatus.OK)
