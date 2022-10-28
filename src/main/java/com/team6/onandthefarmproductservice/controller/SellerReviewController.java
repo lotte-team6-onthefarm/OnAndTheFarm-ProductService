@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team6.onandthefarmproductservice.service.ReviewService;
 import com.team6.onandthefarmproductservice.util.BaseResponse;
 import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponseResult;
 
 import lombok.RequiredArgsConstructor;
 import springfox.documentation.annotations.ApiIgnore;
@@ -24,7 +25,7 @@ public class SellerReviewController {
 	private final ReviewService reviewService;
 
 	@GetMapping("/list/by-seller/{page-no}")
-	public ResponseEntity<BaseResponse<List<ReviewSelectionResponse>>> getReviewBySellerNewest(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber){
+	public ResponseEntity<BaseResponse<ReviewSelectionResponseResult>> getReviewBySellerNewest(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber){
 
 		if(principal == null){
 			BaseResponse baseResponse = BaseResponse.builder()
@@ -37,7 +38,7 @@ public class SellerReviewController {
 		String[] principalInfo = principal.getName().split(" ");
 		Long sellerId = Long.parseLong(principalInfo[0]);
 
-		List<ReviewSelectionResponse> reviews = reviewService.getReviewBySellerNewest(sellerId, Integer.valueOf(pageNumber));
+		ReviewSelectionResponseResult reviews = reviewService.getReviewBySellerNewest(sellerId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
