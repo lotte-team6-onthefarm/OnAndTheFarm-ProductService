@@ -8,16 +8,22 @@ import com.team6.onandthefarmproductservice.entity.Cart;
 import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.entity.ProductQna;
 import com.team6.onandthefarmproductservice.entity.ReservedOrder;
+import com.team6.onandthefarmproductservice.entity.Wish;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.kafka.ProductOrderChannelAdapter;
 import com.team6.onandthefarmproductservice.repository.CartRepository;
 import com.team6.onandthefarmproductservice.repository.ProductQnaRepository;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
+import com.team6.onandthefarmproductservice.repository.ProductWishRepository;
 import com.team6.onandthefarmproductservice.repository.ReservedOrderRepository;
+import com.team6.onandthefarmproductservice.vo.WishVo;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +48,8 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
     private final ProductOrderChannelAdapter productOrderChannelAdapter;
 
     private final ReservedOrderRepository reservedOrderRepository;
+
+    private final ProductWishRepository productWishRepository;
 
     public List<CartVo> findCartByUserId(Long userId){
         ModelMapper modelMapper = new ModelMapper();
@@ -183,5 +191,45 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         ReservedOrder reservedOrder = reservedOrderRepository.findById(id).get();
         reservedOrder.setStatus("CANCEL");
         log.info("Cancel Stock :" + id);
+    }
+
+    public List<WishVo> getWishListByMemberId(PageRequest pageRequest, Long memberId){
+        Page<Wish> wishs = productWishRepository.findWishListPageByUserId(pageRequest, memberId);
+        List<WishVo> wishVos = new ArrayList<>();
+        for (Wish wish : wishs) {
+            WishVo wishVo = WishVo.builder()
+                    .wishId(wish.getWishId())
+                    .productId(wish.getProduct().getProductId())
+                    .userId(wish.getUserId())
+                    .wishStatus(wish.getWishStatus())
+                    .build();
+            wishVos.add(wishVo);
+        }
+        return wishVos;
+    }
+
+    public ProductVo getProductVoByProductId(Long productId){
+        Product product = productRepository.findProductByProductId(productId);
+        ProductVo productVo = ProductVo.builder()
+                .productId(product.getProductId())
+                .categoryId(product.getCategory().getCategoryId())
+                .sellerId(product.getSellerId())
+                .productName(product.getProductName())
+                .productPrice(product.getProductPrice())
+                .productTotalStock(product.getProductTotalStock())
+                .productMainImgSrc(product.getProductMainImgSrc())
+                .productDetail(product.getProductDetail())
+                .productDetailShort(product.getProductDetailShort())
+                .productOriginPlace(product.getProductOriginPlace())
+                .productDeliveryCompany(product.getProductDeliveryCompany())
+                .productRegisterDate(product.getProductRegisterDate())
+                .productUpdateDate(product.getProductUpdateDate())
+                .productStatus(product.getProductStatus())
+                .productWishCount(product.getProductWishCount())
+                .productSoldCount(product.getProductSoldCount())
+                .productDetail(product.getProductDetail())
+                .productViewCount(product.getProductViewCount())
+                .build();
+        return productVo;
     }
 }
