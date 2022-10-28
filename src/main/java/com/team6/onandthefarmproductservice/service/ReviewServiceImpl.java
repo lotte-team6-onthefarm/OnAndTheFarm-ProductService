@@ -90,6 +90,7 @@ public class ReviewServiceImpl implements ReviewService {
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
 		Optional<Review> review = reviewRepository.findById(reviewUpdateFormDto.getReviewId());
+		if(review.get().getReviewStatus().equals("deleted")) return 0l;
 		long reviewId = review.get().updateReview(reviewUpdateFormDto.getReviewContent(), reviewUpdateFormDto.getReviewRate());
 
 		review.get().setReviewModifiedAt(dateUtils.transDate(env.getProperty("dateutils.format")));
@@ -207,7 +208,7 @@ public class ReviewServiceImpl implements ReviewService {
 					.isAvailableUp(true)
 					.build();
 
-			if(review.getUserId() == userId){
+			if(review.getUserId().equals(userId)){
 				reviewSelectionResponse.setIsMyReview(true);
 			}
 			Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByUser(userId, review.getReviewId());
