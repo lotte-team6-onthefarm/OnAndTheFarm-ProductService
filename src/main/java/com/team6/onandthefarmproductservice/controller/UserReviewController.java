@@ -86,6 +86,14 @@ public class UserReviewController {
 		ReviewUpdateFormDto reviewUpdateFormDto = modelMapper.map(reviewUpdateFormRequest, ReviewUpdateFormDto.class);
 		Long reviewId = reviewService.updateReview(reviewUpdateFormDto);
 
+		if(reviewId.equals(0l)){
+			BaseResponse baseResponse = BaseResponse.builder()
+					.httpStatus(HttpStatus.BAD_REQUEST)
+					.message("review update completed")
+					.data(reviewId)
+					.build();
+			return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+		}
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("review update completed")
@@ -199,7 +207,7 @@ public class UserReviewController {
 																								@PathVariable("productId") Long productId,
 																								@PathVariable("page-no") String pageNumber){
 
-		Long userId = null;
+		Long userId = 0l;
 		if(principal != null) {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
