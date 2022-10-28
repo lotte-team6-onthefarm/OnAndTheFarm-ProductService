@@ -19,4 +19,10 @@ public class WishVo {
 	private Long userId;
 
 	private Boolean wishStatus;
+
+	private Integer totalPage;
+
+	private Integer nowPage;
+
+	private Long totalElement;
 }
