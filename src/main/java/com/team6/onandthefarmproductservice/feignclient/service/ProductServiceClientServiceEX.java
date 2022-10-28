@@ -5,6 +5,7 @@ import com.team6.onandthefarmproductservice.entity.ReservedOrder;
 import com.team6.onandthefarmproductservice.entity.Wish;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.vo.WishVo;
+import com.team6.onandthefarmproductservice.vo.product.WishPageVo;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public interface ProductServiceClientServiceEX {
 
     void cancelOrder(Long id);
 
-    List<WishVo> getWishListByMemberId(Integer pageNumber, PageRequest pageRequest, Long memberId);
+    List<WishVo> getWishListByMemberId(WishPageVo wishPageVo, Long memberId);
 
     ProductVo getProductVoByProductId(Long productId);
 }
