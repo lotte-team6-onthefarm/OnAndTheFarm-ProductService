@@ -31,6 +31,7 @@ import com.team6.onandthefarmproductservice.vo.review.ReviewInfoResponse;
 import com.team6.onandthefarmproductservice.vo.review.ReviewLikeCancelFormRequest;
 import com.team6.onandthefarmproductservice.vo.review.ReviewLikeFormRequest;
 import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponseResult;
 import com.team6.onandthefarmproductservice.vo.review.ReviewUpdateFormRequest;
 
 import io.swagger.annotations.ApiOperation;
@@ -203,7 +204,7 @@ public class UserReviewController {
 
 	@GetMapping("/list/orderby/likecount/{productId}/{page-no}")
 	@ApiOperation("리뷰 좋아요순 조회")
-	public ResponseEntity<BaseResponse<List<ReviewSelectionResponse>>> getReviewListByLikeCount(@ApiIgnore Principal principal,
+	public ResponseEntity<BaseResponse<ReviewSelectionResponseResult>> getReviewListByLikeCount(@ApiIgnore Principal principal,
 																								@PathVariable("productId") Long productId,
 																								@PathVariable("page-no") String pageNumber){
 
@@ -212,7 +213,7 @@ public class UserReviewController {
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		List<ReviewSelectionResponse> reviews = reviewService.getReviewListByLikeCount(userId, productId, Integer.valueOf(pageNumber));
+		ReviewSelectionResponseResult reviews = reviewService.getReviewListByLikeCount(userId, productId, Integer.valueOf(pageNumber));
 
 		//필요 부분만 보내기 위해 (셀러, 프로덕트 짜르기)
 		BaseResponse baseResponse = BaseResponse.builder()
@@ -227,7 +228,7 @@ public class UserReviewController {
 
 	@GetMapping("/list/orderby/newest/{productId}/{page-no}")
 	@ApiOperation("상품상세 리뷰조회 최신순")
-	public ResponseEntity<BaseResponse<List<ReviewSelectionResponse>>> getReviewOrderByNewest(@ApiIgnore Principal principal,
+	public ResponseEntity<BaseResponse<ReviewSelectionResponseResult>> getReviewOrderByNewest(@ApiIgnore Principal principal,
 																							  @PathVariable("productId") Long productId,
 																							  @PathVariable("page-no") String pageNumber){
 
@@ -237,7 +238,7 @@ public class UserReviewController {
 			userId = Long.parseLong(principalInfo[0]);
 		}
 
-		List<ReviewSelectionResponse> reviews = reviewService.getReviewListOrderByNewest(userId, productId, Integer.valueOf(pageNumber));
+		ReviewSelectionResponseResult reviews = reviewService.getReviewListOrderByNewest(userId, productId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
@@ -250,7 +251,7 @@ public class UserReviewController {
 
 	@GetMapping("/list/my-review/{page-no}")
 	@ApiOperation("내가쓴 리스트 리뷰 조회")
-	public ResponseEntity<BaseResponse<List<ReviewSelectionResponse>>> getMyReview(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber){
+	public ResponseEntity<BaseResponse<ReviewSelectionResponseResult>> getMyReview(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber){
 
 		if(principal == null){
 			BaseResponse baseResponse = BaseResponse.builder()
@@ -263,7 +264,7 @@ public class UserReviewController {
 		String[] principalInfo = principal.getName().split(" ");
 		Long userId = Long.parseLong(principalInfo[0]);
 
-		List<ReviewSelectionResponse> reviews = reviewService.getMyReview(userId, Integer.valueOf(pageNumber));
+		ReviewSelectionResponseResult reviews = reviewService.getMyReview(userId, Integer.valueOf(pageNumber));
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)

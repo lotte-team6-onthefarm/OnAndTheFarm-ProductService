@@ -9,6 +9,7 @@ import com.team6.onandthefarmproductservice.dto.review.ReviewLikeFormDto;
 import com.team6.onandthefarmproductservice.dto.review.ReviewUpdateFormDto;
 import com.team6.onandthefarmproductservice.vo.review.ReviewInfoResponse;
 import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponseResult;
 
 public interface ReviewService {
 	Long saveReview(ReviewFormDto reviewFormDto);
@@ -17,8 +18,8 @@ public interface ReviewService {
 	Long upLikeCountReview(ReviewLikeFormDto reviewLikeFormDto);
 	Long cancelReviewLikeCount(ReviewLikeCancelFormDto reviewLikeCancelFormDto);
 	ReviewInfoResponse getReviewInfo(Long productId);
-	List<ReviewSelectionResponse> getReviewListByLikeCount(Long userId, Long productId, Integer pageNumber);
-	List<ReviewSelectionResponse> getReviewListOrderByNewest(Long userId, Long productId, Integer pageNumber);
-	List<ReviewSelectionResponse> getReviewBySellerNewest(Long sellerId, Integer pageNumber);
-	List<ReviewSelectionResponse> getMyReview(Long userId, Integer pageNumber);
+	ReviewSelectionResponseResult getReviewListByLikeCount(Long userId, Long productId, Integer pageNumber);
+	ReviewSelectionResponseResult getReviewListOrderByNewest(Long userId, Long productId, Integer pageNumber);
+	ReviewSelectionResponseResult getReviewBySellerNewest(Long sellerId, Integer pageNumber);
+	ReviewSelectionResponseResult getMyReview(Long userId, Integer pageNumber);
 }

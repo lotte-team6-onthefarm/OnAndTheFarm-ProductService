@@ -29,9 +29,11 @@ import com.team6.onandthefarmproductservice.repository.ReviewLikeRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewPagingRepository;
 import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
+import com.team6.onandthefarmproductservice.vo.PageVo;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientOrderProductIdResponse;
 import com.team6.onandthefarmproductservice.vo.review.ReviewInfoResponse;
 import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponse;
+import com.team6.onandthefarmproductservice.vo.review.ReviewSelectionResponseResult;
 
 @Service
 @Transactional
@@ -187,7 +189,7 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 
-	public List<ReviewSelectionResponse> getReviewListByLikeCount(Long userId, Long productId, Integer pageNumber){
+	public ReviewSelectionResponseResult getReviewListByLikeCount(Long userId, Long productId, Integer pageNumber){
 		// msa 고려하여 다시 설계할 것
 		// Product product = productRepository.findById(productId).get();
 		// List<Review> reviews = reviewRepository.findReviewsByProductOrderByReviewLikeCountDesc(product);
@@ -207,9 +209,6 @@ public class ReviewServiceImpl implements ReviewService {
 					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
 					.isMyReview(false)
 					.isAvailableUp(true)
-					.totalPage(reviews.getTotalPages())
-					.nowPage(pageNumber)
-					.totalElement(reviews.getTotalElements())
 					.build();
 
 			if(review.getUserId().equals(userId)){
@@ -221,10 +220,21 @@ public class ReviewServiceImpl implements ReviewService {
 			}
 			reviewResponses.add(reviewSelectionResponse);
 		}
-		return reviewResponses;
+
+		PageVo pageVo = PageVo.builder()
+				.totalPage(reviews.getTotalPages())
+				.nowPage(pageNumber)
+				.totalElement(reviews.getTotalElements())
+				.build();
+
+		ReviewSelectionResponseResult reviewSelectionResponseResult = ReviewSelectionResponseResult.builder()
+				.reviewSelectionResponses(reviewResponses)
+				.pageVo(pageVo)
+				.build();
+		return reviewSelectionResponseResult;
 	}
 
-	public List<ReviewSelectionResponse> getReviewListOrderByNewest(Long userId, Long productId, Integer pageNumber) {
+	public ReviewSelectionResponseResult getReviewListOrderByNewest(Long userId, Long productId, Integer pageNumber) {
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 
@@ -243,9 +253,6 @@ public class ReviewServiceImpl implements ReviewService {
 					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
 					.isMyReview(false)
 					.isAvailableUp(true)
-					.totalPage(reviews.getTotalPages())
-					.nowPage(pageNumber)
-					.totalElement(reviews.getTotalElements())
 					.build();
 
 			if(review.getUserId() == userId){
@@ -257,10 +264,20 @@ public class ReviewServiceImpl implements ReviewService {
 			}
 			reviewResponse.add(reviewSelectionResponse);
 		}
-		return reviewResponse;
+		PageVo pageVo = PageVo.builder()
+				.totalPage(reviews.getTotalPages())
+				.nowPage(pageNumber)
+				.totalElement(reviews.getTotalElements())
+				.build();
+		ReviewSelectionResponseResult reviewSelectionResponseResult =ReviewSelectionResponseResult.builder()
+				.reviewSelectionResponses(reviewResponse)
+				.pageVo(pageVo)
+				.build();
+
+		return reviewSelectionResponseResult;
 	}
 
-	public List<ReviewSelectionResponse> getReviewBySellerNewest(Long sellerId, Integer pageNumber) {
+	public ReviewSelectionResponseResult getReviewBySellerNewest(Long sellerId, Integer pageNumber) {
 
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListBySeller(pageRequest, sellerId);
@@ -280,17 +297,23 @@ public class ReviewServiceImpl implements ReviewService {
 					.productMainImgSrc(review.getProduct().getProductMainImgSrc())
 					.productName(review.getProduct().getProductName())
 					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
-					.totalPage(reviews.getTotalPages())
-					.nowPage(pageNumber)
-					.totalElement(reviews.getTotalElements())
 					.build();
 			reviewResponse.add(reviewSelectionResponse);
 		}
+		PageVo pageVo = PageVo.builder()
+				.totalPage(reviews.getTotalPages())
+				.nowPage(pageNumber)
+				.totalElement(reviews.getTotalElements())
+				.build();
+		ReviewSelectionResponseResult reviewSelectionResponseResult =ReviewSelectionResponseResult.builder()
+				.reviewSelectionResponses(reviewResponse)
+				.pageVo(pageVo)
+				.build();
 
-		return reviewResponse;
+		return reviewSelectionResponseResult;
 	}
 
-	public List<ReviewSelectionResponse> getMyReview(Long userId, Integer pageNumber) {
+	public ReviewSelectionResponseResult getMyReview(Long userId, Integer pageNumber) {
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListByUser(pageRequest, userId);
 
@@ -310,9 +333,6 @@ public class ReviewServiceImpl implements ReviewService {
 					.productName(review.getProduct().getProductName())
 					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
 					.isAvailableUp(true)
-					.totalPage(reviews.getTotalPages())
-					.nowPage(pageNumber)
-					.totalElement(reviews.getTotalElements())
 					.build();
 			Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByUser(userId, review.getReviewId());
 			if(reviewLike.isPresent()){
@@ -320,6 +340,16 @@ public class ReviewServiceImpl implements ReviewService {
 			}
 			reviewResponse.add(reviewSelectionResponse);
 		}
-		return reviewResponse;
+		PageVo pageVo = PageVo.builder()
+				.totalPage(reviews.getTotalPages())
+				.nowPage(pageNumber)
+				.totalElement(reviews.getTotalElements())
+				.build();
+		ReviewSelectionResponseResult reviewSelectionResponseResult =ReviewSelectionResponseResult.builder()
+				.reviewSelectionResponses(reviewResponse)
+				.pageVo(pageVo)
+				.build();
+
+		return reviewSelectionResponseResult;
 	}
 }
