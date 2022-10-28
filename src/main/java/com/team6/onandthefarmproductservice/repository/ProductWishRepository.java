@@ -10,7 +10,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.team6.onandthefarmproductservice.entity.Wish;
-import com.team6.onandthefarmproductservice.vo.WishVo;
 
 public interface ProductWishRepository extends CrudRepository<Wish, Long> {
 

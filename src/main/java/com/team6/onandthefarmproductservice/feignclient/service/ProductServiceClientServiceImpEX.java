@@ -17,6 +17,7 @@ import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.repository.ProductWishRepository;
 import com.team6.onandthefarmproductservice.repository.ReservedOrderRepository;
 import com.team6.onandthefarmproductservice.vo.WishVo;
+import com.team6.onandthefarmproductservice.vo.product.WishPageVo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -193,8 +194,8 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         log.info("Cancel Stock :" + id);
     }
 
-    public List<WishVo> getWishListByMemberId(Integer pageNumber, PageRequest pageRequest, Long memberId){
-        Page<Wish> wishs = productWishRepository.findWishListPageByUserId(pageRequest, memberId);
+    public List<WishVo> getWishListByMemberId(WishPageVo wishPageVo, Long memberId){
+        Page<Wish> wishs = productWishRepository.findWishListPageByUserId(wishPageVo.getPageRequest(), memberId);
         List<WishVo> wishVos = new ArrayList<>();
         for (Wish wish : wishs) {
             WishVo wishVo = WishVo.builder()
@@ -203,7 +204,7 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
                     .userId(wish.getUserId())
                     .wishStatus(wish.getWishStatus())
                     .totalPage(wishs.getTotalPages())
-                    .nowPage(pageNumber)
+                    .nowPage(wishPageVo.getPageNumber())
                     .totalElement(wishs.getTotalElements())
                     .build();
             wishVos.add(wishVo);

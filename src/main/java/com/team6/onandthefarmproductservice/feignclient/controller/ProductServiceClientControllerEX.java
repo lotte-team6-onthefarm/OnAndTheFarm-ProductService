@@ -10,6 +10,7 @@ import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.service.ProductService;
 import com.team6.onandthefarmproductservice.vo.WishVo;
+import com.team6.onandthefarmproductservice.vo.product.WishPageVo;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -139,8 +140,8 @@ public class ProductServiceClientControllerEX {
 
     //member Id로 wish-list를 불러오는 메서드
     @GetMapping("/api/user/product/product-service/wish-list/{user-no}")
-    public List<WishVo> findWishListByMemberId(Integer pageNumber, PageRequest pageRequest, @PathVariable("user-no")Long memberId){
-        return productServiceClientService.getWishListByMemberId(pageNumber, pageRequest, memberId);
+    public List<WishVo> findWishListByMemberId(@RequestBody WishPageVo wishPageVo, @PathVariable("user-no")Long memberId){
+        return productServiceClientService.getWishListByMemberId(wishPageVo, memberId);
     }
     //product Id로 product 불러오는 메서드
     @GetMapping("/api/user/product/product-service/product/{product-no}")
