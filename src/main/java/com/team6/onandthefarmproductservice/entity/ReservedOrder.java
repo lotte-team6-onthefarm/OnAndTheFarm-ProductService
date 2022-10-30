@@ -24,6 +24,8 @@ public class ReservedOrder {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long reservedOrderId;
 
+    private Long orderSerial;
+
     private String productList;
 
     private LocalDateTime createdDate;
