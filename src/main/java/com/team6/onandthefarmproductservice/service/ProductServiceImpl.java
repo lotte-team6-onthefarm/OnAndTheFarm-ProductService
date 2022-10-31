@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.team6.onandthefarmproductservice.dto.product.*;
 import com.team6.onandthefarmproductservice.entity.*;
+import com.team6.onandthefarmproductservice.repository.*;
 import com.team6.onandthefarmproductservice.vo.PageVo;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientSellerIdAndDateResponse;
 import com.team6.onandthefarmproductservice.vo.product.*;
@@ -22,15 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.team6.onandthefarmproductservice.feignclient.OrderServiceClient;
 import com.team6.onandthefarmproductservice.feignclient.SellerServiceClient;
 import com.team6.onandthefarmproductservice.feignclient.UserServiceClient;
-import com.team6.onandthefarmproductservice.repository.CartRepository;
-import com.team6.onandthefarmproductservice.repository.CategoryRepository;
-import com.team6.onandthefarmproductservice.repository.ProductImgRepository;
-import com.team6.onandthefarmproductservice.repository.ProductPagingRepository;
-import com.team6.onandthefarmproductservice.repository.ProductQnaAnswerRepository;
-import com.team6.onandthefarmproductservice.repository.ProductQnaRepository;
-import com.team6.onandthefarmproductservice.repository.ProductRepository;
-import com.team6.onandthefarmproductservice.repository.ProductWishRepository;
-import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.util.DateUtils;
 import com.team6.onandthefarmproductservice.util.S3Upload;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientOrderProductIdResponse;
@@ -58,6 +50,7 @@ public class ProductServiceImpl implements ProductService {
 	private ProductWishRepository productWishRepository;
 	private CartRepository cartRepository;
 	private ReviewRepository reviewRepository;
+	private ReservedOrderRepository reservedOrderRepository;
 	private DateUtils dateUtils;
 
 	private S3Upload s3Upload;
@@ -78,7 +71,8 @@ public class ProductServiceImpl implements ProductService {
 							  ProductPagingRepository productPagingRepository,
 							  ReviewRepository reviewRepository,
 							  ProductImgRepository productImgRepository,
-							  S3Upload s3Upload) {
+							  S3Upload s3Upload,
+							  ReservedOrderRepository reservedOrderRepository) {
 		this.productRepository = productRepository;
 		this.categoryRepository = categoryRepository;
 		this.productPagingRepository = productPagingRepository;
@@ -94,6 +88,7 @@ public class ProductServiceImpl implements ProductService {
 		this.reviewRepository = reviewRepository;
 		this.s3Upload=s3Upload;
 		this.productImgRepository=productImgRepository;
+		this.reservedOrderRepository=reservedOrderRepository;
 	}
 
 	@Override
@@ -721,10 +716,9 @@ public class ProductServiceImpl implements ProductService {
 		return productReviewResponseList;
 	}
 
-	public void updateStockAndSoldCount(Object productStockDto){
-		HashMap<String,Object> productStock = (HashMap<String,Object>) productStockDto;
-		Long productId = Long.valueOf(String.valueOf(productStock.get("productId")));
-		Integer productQty = Integer.valueOf(String.valueOf(productStock.get("productQty")));
+	public void updateStockAndSoldCount(ProductStockDto productStockDto){
+		Long productId = productStockDto.getProductId();
+		Integer productQty = productStockDto.getProductQty();
 
 		Product product = productRepository.findById(productId).get();
 		product.setProductTotalStock(product.getProductTotalStock()-productQty);
@@ -1078,4 +1072,21 @@ public class ProductServiceImpl implements ProductService {
         }
         return Boolean.TRUE;
     }
+
+	/**
+	 * 중복 메시지 처리를 위한 메서드
+	 * @param orderId
+	 * @return true : 중복되지 않은 메시지 / false : 중복된 메시지
+	 */
+	public boolean isAlreadyProcessedOrderId(String orderId) {
+		// 처리된 메시지가 있는지 확인
+		List<ReservedOrder> reservedOrders
+				= reservedOrderRepository.findByOrderSerialAndIdempoStatus(orderId,true);
+
+		if(reservedOrders.isEmpty()){ // 처리된 메시지가 없는 경우 중복되지 않은 메시지
+			return true; //
+		}
+
+		return false;
+	}
 }

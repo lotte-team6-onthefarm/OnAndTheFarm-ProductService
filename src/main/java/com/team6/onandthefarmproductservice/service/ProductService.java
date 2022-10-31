@@ -49,7 +49,7 @@ public interface ProductService {
 	
     ProductDetailResponse findProductDetail(Long productId, Long userId);
 
-    void updateStockAndSoldCount(Object productStockDto);
+    void updateStockAndSoldCount(ProductStockDto productStockDto);
 
     Boolean createProductQnA(UserQnaDto userQnaDto);
 
@@ -68,4 +68,6 @@ public interface ProductService {
     SellerProductQnaResponseResult findSellerQnA(Long sellerId, Integer pageNumber);
 
     Boolean createQnaAnswer(SellerQnaDto sellerQnaDto);
+
+    boolean isAlreadyProcessedOrderId(String orderId);
 }

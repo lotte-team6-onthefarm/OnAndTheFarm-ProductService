@@ -1,6 +1,8 @@
 package com.team6.onandthefarmproductservice.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team6.onandthefarmproductservice.dto.product.KafkaConfirmOrderDto;
+import com.team6.onandthefarmproductservice.dto.product.ProductStockDto;
 import com.team6.onandthefarmproductservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,19 +30,24 @@ public class ProductOrderChannelAdapterKafkaImpl implements ProductOrderChannelA
         this.kafkaTemplate.send(TOPIC, message);
     }
 
-    @KafkaListener(topics = TOPIC)
-    public void consumer(String message, Acknowledgment ack) {
+    @KafkaListener(topics = TOPIC, containerFactory = "kafkaListenerContainerFactory")
+    public void consumer(String message, Acknowledgment ack) throws Exception{
         log.info(String.format("Message Received : %s", message));
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<Object> productStockDtos = objectMapper.readValue(message, List.class);
-            for(Object productStockDto : productStockDtos){
-                productService.updateStockAndSoldCount(productStockDto);
-            }
-            // Kafka Offset Manual Commit(수동커밋)
-            ack.acknowledge();
-        } catch (Exception e) {
-            e.printStackTrace();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        KafkaConfirmOrderDto kafkaConfirmOrderDto
+                = objectMapper.readValue(message, KafkaConfirmOrderDto.class);
+
+        if(!productService.isAlreadyProcessedOrderId(kafkaConfirmOrderDto.getOrderSerial())){
+            ack.acknowledge(); // 중복일 경우 offset을 옮기고 commit한 뒤
+            return; // 메시지 처리 종료
         }
+
+        //Long test = Long.valueOf("adsads");
+        for(ProductStockDto productStockDto : kafkaConfirmOrderDto.getProductStockDtos()){
+            productService.updateStockAndSoldCount(productStockDto);
+        }
+        // Kafka Offset Manual Commit(수동커밋)
+        ack.acknowledge();
     }
 }

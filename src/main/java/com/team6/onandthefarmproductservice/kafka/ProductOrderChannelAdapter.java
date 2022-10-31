@@ -5,5 +5,5 @@ import org.springframework.kafka.support.Acknowledgment;
 public interface ProductOrderChannelAdapter {
     void producer(String message);
 
-    void consumer(String message, Acknowledgment ack);
+    void consumer(String message, Acknowledgment ack) throws Exception;
 }
