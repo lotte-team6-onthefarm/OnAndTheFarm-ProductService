@@ -2,6 +2,7 @@ package com.team6.onandthefarmproductservice.feignclient.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team6.onandthefarmproductservice.dto.product.KafkaConfirmOrderDto;
 import com.team6.onandthefarmproductservice.dto.product.OrderProductDto;
 import com.team6.onandthefarmproductservice.dto.product.ProductStockDto;
 import com.team6.onandthefarmproductservice.entity.Cart;
@@ -129,11 +130,13 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
      * @param productList
      * @return
      */
-    public ReservedOrder reservedOrder(String productList) {
+    public ReservedOrder reservedOrder(String productList,String orderSerial) {
         ReservedOrder reservedOrder = ReservedOrder.builder()
                 .productList(productList)
+                .orderSerial(orderSerial)
                 .createdDate(LocalDateTime.now())
                 .expireTime(LocalDateTime.now().plus(3l, ChronoUnit.SECONDS))
+                .idempoStatus(false)
                 .build();
         return reservedOrderRepository.save(reservedOrder);
     }
@@ -146,6 +149,9 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
     public Boolean confirmOrder(Long id) {
         ReservedOrder reservedOrder = reservedOrderRepository.findById(id).get();
         reservedOrder.validate(); // 예약 정보의 유효성 검증
+
+        KafkaConfirmOrderDto kafkaConfirmOrderDto = new KafkaConfirmOrderDto();
+
         List<ProductStockDto> productStockDtos = new ArrayList<>(); // 제품 재고 및 판매 카운트의 메시지를 위한 리스트
 
         List<OrderProductDto> orderProductDtoList = new ArrayList<>();
@@ -172,6 +178,8 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
 //            // 상품 판매 count 증가
 //            product.setProductSoldCount(product.getProductSoldCount()+1);
         }
+        kafkaConfirmOrderDto.setOrderSerial(reservedOrder.getOrderSerial());
+        kafkaConfirmOrderDto.setProductStockDtos(productStockDtos);
 
         // ReservedStock 상태 변경
         reservedOrder.setStatus("CONFIRMED");
@@ -179,7 +187,7 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         String message = "";
         ObjectMapper objectMapper = new ObjectMapper();
         try{
-            message = objectMapper.writeValueAsString(productStockDtos);
+            message = objectMapper.writeValueAsString(kafkaConfirmOrderDto);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

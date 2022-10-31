@@ -24,7 +24,7 @@ public class ReservedOrder {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long reservedOrderId;
 
-    private Long orderSerial;
+    private String orderSerial;
 
     private String productList;
 
@@ -32,7 +32,9 @@ public class ReservedOrder {
 
     private LocalDateTime expireTime;
 
-    private String status;
+    private String status; // cancel / confirm 상태
+
+    private Boolean idempoStatus; // 멱등성을 위한 상태 / true : 처리된 메시지 false : 미처리된 메시지
 
     public void validate() {
         validateStatus();

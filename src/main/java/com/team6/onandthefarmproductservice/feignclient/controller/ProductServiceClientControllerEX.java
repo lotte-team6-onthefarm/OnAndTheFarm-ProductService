@@ -82,17 +82,20 @@ public class ProductServiceClientControllerEX {
     @PostMapping("/api/user/product/product-service/order-try")
     public ResponseEntity<ParticipantLink> orderTry(@RequestBody Map<String, Object> map){
         String productList = "";
+        String orderSerial = "";
 
         ObjectMapper objectMapper = new ObjectMapper();
         try{
             // 상품들의 정보를 직렬화
             productList = objectMapper.writeValueAsString(map.get("productIdList"));
+            orderSerial = objectMapper.writeValueAsString(map.get("orderSerial"));
+            orderSerial = orderSerial.substring(1,orderSerial.length()-1);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
         // 주문 예약 테이블에 예약 저장
-        ReservedOrder reservedOrder = productServiceClientService.reservedOrder(productList);
+        ReservedOrder reservedOrder = productServiceClientService.reservedOrder(productList,orderSerial);
 
         final ParticipantLink participantLink = buildParticipantLink(
                 reservedOrder.getReservedOrderId(),

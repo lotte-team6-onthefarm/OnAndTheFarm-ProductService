@@ -23,7 +23,7 @@ public interface ProductServiceClientServiceEX {
 
     List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId);
 
-    ReservedOrder reservedOrder(String productList);
+    ReservedOrder reservedOrder(String productList,String orderSerial);
 
     Boolean confirmOrder(Long id);
 
