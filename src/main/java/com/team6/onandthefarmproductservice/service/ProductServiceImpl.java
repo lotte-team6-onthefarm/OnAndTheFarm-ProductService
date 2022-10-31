@@ -351,7 +351,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getAllProductListOrderByNewest(Long userId, Integer pageNumber){
-		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber, 16, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList = productPagingRepository.findAllProductOrderByNewest(pageRequest);
 		int totalPage = productList.getTotalPages();
@@ -368,7 +368,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductsListByHighPrice(Long userId, Integer pageNumber) {
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productPrice").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductListByHighPrice(pageRequest);
 		int totalPage = productList.getTotalPages();
@@ -385,7 +385,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductsListByLowPrice(Long userId, Integer pageNumber) {
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").ascending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productPrice").ascending());
 
 		Page<Product> productList =  productPagingRepository.findProductListByLowPrice(pageRequest);
 		int totalPage = productList.getTotalPages();
@@ -419,7 +419,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductsBySoldCount(Long userId, Integer pageNumber) {
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productSoldCount").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productSoldCount").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductBySoldCount(pageRequest);
 		int totalPage = productList.getTotalPages();
@@ -436,7 +436,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
-		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber, 16, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductBySellerNewest(pageRequest, sellerId);
 		int totalPage = productList.getTotalPages();
@@ -453,7 +453,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductListByCategoryNewest(Long userId, String category, Integer pageNumber) {
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productRegisterDate").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductsByCategoryNewest(pageRequest, category);
 		int totalPage = productList.getTotalPages();
@@ -470,7 +470,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductListByCategoryHighest(Long userId, String category, Integer pageNumber) {
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productPrice").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductByCategoryHighest(pageRequest, category);
 		int totalPage = productList.getTotalPages();
@@ -487,7 +487,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductListByCategoryLowest(Long userId, String category, Integer pageNumber) {
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productPrice").ascending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productPrice").ascending());
 
 		Page<Product> productList =  productPagingRepository.findProductByCategoryLowest(pageRequest, category);
 		int totalPage = productList.getTotalPages();
@@ -504,7 +504,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getProductsByCategorySoldCount(Long userId, String category, Integer pageNumber){
-		PageRequest pageRequest = PageRequest.of(pageNumber,8, Sort.by("productSoldCount").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber,16, Sort.by("productSoldCount").descending());
 
 		Page<Product> productList =  productPagingRepository.findProductByCategorySoldCount(pageRequest, category);
 		int totalPage = productList.getTotalPages();
@@ -521,7 +521,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getSellingProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
-		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber, 16, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findSellingProductBySellerNewest(pageRequest, sellerId);
 		int totalPage = productList.getTotalPages();
@@ -538,7 +538,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductSelectionResponseResult getPauseProductListBySellerNewest(Long userId, Long sellerId, Integer pageNumber){
-		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("productRegisterDate").descending());
+		PageRequest pageRequest = PageRequest.of(pageNumber, 16, Sort.by("productRegisterDate").descending());
 
 		Page<Product> productList =  productPagingRepository.findPauseProductBySellerNewest(pageRequest, sellerId);
 		int totalPage = productList.getTotalPages();
