@@ -263,7 +263,7 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/list/{category}/{page-no}")
+	@GetMapping(value = "/list/{category}/newest/{page-no}")
 	@ApiOperation(value = "상품 카테고리별 최신순 조회")
 	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductsListByCategoryNewest(
 			@ApiIgnore Principal principal,
