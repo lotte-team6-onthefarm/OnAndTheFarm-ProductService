@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -31,11 +32,13 @@ import java.util.function.BiFunction;
 public class KafkaConsumerConfig {
 
     private final KafkaTemplate<String, String> template;
-    private final Environment env;
+
+    @Value("${kafka.url}")
+    private String kafkaUrl;
     @Bean
     public ConsumerFactory<String,String> consumerFactory(){
         Map<String,Object> properties = new HashMap<>();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"13.124.9.207:9092");
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,kafkaUrl);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG,"consumerGroupId");
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
