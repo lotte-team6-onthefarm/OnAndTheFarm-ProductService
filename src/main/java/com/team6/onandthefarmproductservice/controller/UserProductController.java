@@ -154,7 +154,7 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/list/orderby/highprice/{page-no}")
+	@GetMapping(value = "/list/all/highprice/{page-no}")
 	@ApiOperation(value = "상품 높은 가격 순 조회")
 	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByHighPrice(
 			@ApiIgnore Principal principal,
@@ -177,7 +177,7 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/list/orderby/lowprice/{page-no}")
+	@GetMapping(value = "/list/all/lowprice/{page-no}")
 	@ApiOperation(value = "상품 낮은 가격 순 조회")
 	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductListByLowPrice(
 			@ApiIgnore Principal principal,
@@ -218,7 +218,7 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/list/orderby/soldcount/{page-no}")
+	@GetMapping(value = "/list/all/soldcount/{page-no}")
 	@ApiOperation(value = "상품 높은 판매순 조회")
 	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> getProductsListBySoldCount(
 			@ApiIgnore Principal principal,
