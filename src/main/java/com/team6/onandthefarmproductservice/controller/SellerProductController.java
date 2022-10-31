@@ -219,7 +219,7 @@ public class SellerProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/list/orderby/{category}/{page-no}")
+	@GetMapping(value = "/list/orderby/{category}/newest/{page-no}")
 	@ApiOperation(value = "상품 카테고리별 최신순 조회")
 	public ResponseEntity<BaseResponse<ProductSelectionResponseResult>> getProductsListByCategoryNewest(
 			@PathVariable("category") String category, @PathVariable("page-no") String pageNumber) {
