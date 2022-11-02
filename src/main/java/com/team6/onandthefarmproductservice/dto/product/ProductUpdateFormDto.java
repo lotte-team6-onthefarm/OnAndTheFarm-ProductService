@@ -51,8 +51,6 @@ public class ProductUpdateFormDto {
 
 	private Integer productSoldCount;
 
-	private List<Long> deleteImageIdList;
-
 	private List<MultipartFile> addImageList;
 
 	private List<MultipartFile> mainImage;
