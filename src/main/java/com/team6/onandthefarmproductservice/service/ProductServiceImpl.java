@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.team6.onandthefarmproductservice.dto.product.*;
 import com.team6.onandthefarmproductservice.entity.*;
+import com.team6.onandthefarmproductservice.feignclient.vo.UserVo;
 import com.team6.onandthefarmproductservice.repository.*;
 import com.team6.onandthefarmproductservice.vo.PageVo;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientSellerIdAndDateResponse;
@@ -12,6 +13,8 @@ import com.team6.onandthefarmproductservice.vo.product.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +58,7 @@ public class ProductServiceImpl implements ProductService {
 
 	private S3Upload s3Upload;
 	private Environment env;
+	private CircuitBreakerFactory circuitBreakerFactory;
 
 	@Autowired
 	public ProductServiceImpl(ProductRepository productRepository,
@@ -72,7 +76,8 @@ public class ProductServiceImpl implements ProductService {
 							  ReviewRepository reviewRepository,
 							  ProductImgRepository productImgRepository,
 							  S3Upload s3Upload,
-							  ReservedOrderRepository reservedOrderRepository) {
+							  ReservedOrderRepository reservedOrderRepository,
+							  CircuitBreakerFactory circuitBreakerFactory) {
 		this.productRepository = productRepository;
 		this.categoryRepository = categoryRepository;
 		this.productPagingRepository = productPagingRepository;
@@ -89,6 +94,7 @@ public class ProductServiceImpl implements ProductService {
 		this.s3Upload=s3Upload;
 		this.productImgRepository=productImgRepository;
 		this.reservedOrderRepository=reservedOrderRepository;
+		this.circuitBreakerFactory=circuitBreakerFactory;
 	}
 
 	@Override
@@ -299,10 +305,15 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductDetailResponse findProductDetail(Long productId, Long userId, Long feedNumber) {
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
 		Product product = productRepository.findById(productId).get();
 		product.setProductViewCount(product.getProductViewCount()+1);
 		Long sellerId = productRepository.findById(productId).get().getSellerId();
-		SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(sellerId);
+		SellerClientSellerDetailResponse sellerClientSellerDetailResponse
+				= circuitBreaker.run(
+						()->sellerServiceClient.findBySellerId(sellerId),
+				throwable -> new SellerClientSellerDetailResponse());
+		//SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(sellerId);
 
 		ProductDetailResponse productDetailResponse = new ProductDetailResponse(product, sellerClientSellerDetailResponse);
 		productDetailResponse.setProductViewCount(productDetailResponse.getProductViewCount()+1);
@@ -550,7 +561,8 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<ProductQnAResponse> findProductQnAList(Long productId){
+	public ProductQnAResponseResult findProductQnAList(Long productId, Integer pageNumber) {
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		Optional<Product> product = productRepository.findById(productId);
@@ -558,21 +570,26 @@ public class ProductServiceImpl implements ProductService {
 
 		List<ProductQnAResponse> responses = new ArrayList<>();
 
-		for(ProductQna productQna : productQnas){
+		for (ProductQna productQna : productQnas) {
+			UserVo user
+					= circuitBreaker.run(
+							()->userServiceClient.findByUserId(productQna.getUserId()),
+					throwable -> new UserVo());
+			//UserVo user = userServiceClient.findByUserId(productQna.getUserId());
 			ProductQnAResponse response = ProductQnAResponse.builder()
 					.productQnaStatus(productQna.getProductQnaStatus())
 					.productQnaCreatedAt(productQna.getProductQnaCreatedAt())
 					.productQnaContent(productQna.getProductQnaContent())
 					.productQnaId(productQna.getProductQnaId())
 					.productQnaModifiedAt(productQna.getProductQnaModifiedAt())
-					.userName(userServiceClient.findUserNameByUserId(productQna.getUserId()).getUserName())
-					.userProfileImg(userServiceClient.findUserNameByUserId(productQna.getUserId()).getUserProfileImg())
+					.userName(user.getUserName())
+					.userProfileImg(user.getUserProfileImg())
 					.build();
-			if(productQna.getProductQnaStatus().equals("waiting")){
+			if (productQna.getProductQnaStatus().equals("waiting")) {
 				responses.add(response);
 				continue;
 			}
-			if(productQna.getProductQnaStatus().equals("deleted")){
+			if (productQna.getProductQnaStatus().equals("deleted")) {
 				continue;
 			}
 			String answer =
@@ -582,6 +599,7 @@ public class ProductServiceImpl implements ProductService {
 			response.setProductSellerAnswer(answer);
 			responses.add(response);
 		}
+
 
 //		// QNA : QNA답변
 //		Map<ProductQnAResponse, ProductQnaAnswerResponse> matching = new HashMap<>();
@@ -598,7 +616,36 @@ public class ProductServiceImpl implements ProductService {
 //			}
 //		}
 
-		return responses;
+		ProductQnAResponseResult resultResponse = new ProductQnAResponseResult();
+		responses.sort((o1, o2) -> {
+			int result = o2.getProductQnaCreatedAt().compareTo(o1.getProductQnaCreatedAt());
+			return result;
+		});
+
+		int startIndex = pageNumber * pageContentNumber;
+
+		int size = responses.size();
+
+
+		if (size < startIndex + pageContentNumber) {
+			resultResponse.setProductQnAResponseList(responses.subList(startIndex, size));
+			resultResponse.setCurrentPageNum(pageNumber);
+			if (size % pageContentNumber != 0) {
+				resultResponse.setTotalPageNum((size / pageContentNumber) + 1);
+			} else {
+				resultResponse.setTotalPageNum(size / pageContentNumber);
+			}
+			return resultResponse;
+		}
+
+		resultResponse.setProductQnAResponseList(responses.subList(startIndex, startIndex + pageContentNumber));
+		resultResponse.setCurrentPageNum(pageNumber);
+		if (size % pageContentNumber != 0) {
+			resultResponse.setTotalPageNum((size / pageContentNumber) + 1);
+		} else {
+			resultResponse.setTotalPageNum(size / pageContentNumber);
+		}
+		return resultResponse;
 	}
 
 	/**
@@ -607,10 +654,16 @@ public class ProductServiceImpl implements ProductService {
 	 * @return List<ProductSelectionResponse>
 	 */
 	private ProductSelectionResponseResult setProductSelectResponse(Page<Product> productList, Long userId, PageVo pageVo){
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
+
 		List<ProductSelectionResponse> productResponseList = new ArrayList<>();
 
 		for(Product p : productList) {
-			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(p.getSellerId());
+			SellerClientSellerDetailResponse sellerClientSellerDetailResponse
+					= circuitBreaker.run(
+							()->sellerServiceClient.findBySellerId(p.getSellerId()),
+					throwable -> new SellerClientSellerDetailResponse());
+			//SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(p.getSellerId());
 
 			ProductSelectionResponse pResponse = new ProductSelectionResponse(p, sellerClientSellerDetailResponse);
 
@@ -653,14 +706,28 @@ public class ProductServiceImpl implements ProductService {
 	 */
 	@Override
 	public ProductReviewResult getProductsWithoutReview(Long userId, Integer pageNumber) {
+		CircuitBreaker orderCircuitBreaker = circuitBreakerFactory.create("order_circuitbreaker");
+		CircuitBreaker sellerCircuitBreaker = circuitBreakerFactory.create("seller_circuitbreaker");
 
 		ProductReviewResult productReviewResult = new ProductReviewResult();
 
 		List<ProductReviewResponse> productReviewResponses = new ArrayList<>();
-		List<OrdersByUserResponse> orders = orderServiceClient.findProductWithoutReview(userId);
+		List<OrdersByUserResponse> orders
+				= orderCircuitBreaker.run(
+						()->orderServiceClient.findProductWithoutReview(userId),
+				throwable -> new ArrayList());
+		//List<OrdersByUserResponse> orders = orderServiceClient.findProductWithoutReview(userId);
 		for(OrdersByUserResponse o : orders){
-			List<OrderClientOrderProductIdResponse> orderProducts = orderServiceClient.findByOrdersId(o.getOrdersId());
-			SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(o.getSellerId());
+			List<OrderClientOrderProductIdResponse> orderProducts
+					= orderCircuitBreaker.run(
+					()->orderServiceClient.findByOrdersId(o.getOrdersId()),
+					throwable -> new ArrayList());
+			//List<OrderClientOrderProductIdResponse> orderProducts = orderServiceClient.findByOrdersId(o.getOrdersId());
+			SellerClientSellerDetailResponse sellerClientSellerDetailResponse
+					= sellerCircuitBreaker.run(
+					()->sellerServiceClient.findBySellerId(o.getSellerId()),
+					throwable -> new SellerClientSellerDetailResponse());
+			//SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(o.getSellerId());
 
 			for(OrderClientOrderProductIdResponse orderProduct : orderProducts){
 				Optional<Review> review = reviewRepository.findReviewByOrderProductId(orderProduct.getOrderProductId());
@@ -752,13 +819,19 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public ProductQnAResultResponse findUserQna(Long userId, Integer pageNum) {
+		CircuitBreaker userCircuitbreaker = circuitBreakerFactory.create("user_circuitbreaker");
+
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
 		List<ProductQnAResponse> responses = new ArrayList<>();
 
 		List<ProductQna> productQnas = productQnaRepository.findByUserId(userId);
-		UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(userId);
+		UserClientUserShortInfoResponse userClientUserShortInfoResponse
+				= userCircuitbreaker.run(
+				()->userServiceClient.findUserNameByUserId(userId),
+				throwable -> new UserClientUserShortInfoResponse());
+		//UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(userId);
 
 		for (ProductQna productQna : productQnas) {
 			ProductQnAResponse response = modelMapper.map(productQna, ProductQnAResponse.class);
@@ -842,6 +915,7 @@ public class ProductServiceImpl implements ProductService {
      */
 	@Override
     public SellerMypageResponse findSellerMypage(SellerMypageDto sellerMypageDto){
+		CircuitBreaker orderCircuitbreaker = circuitBreakerFactory.create("order_circuitbreaker");
 
         SellerMypageResponse response = new SellerMypageResponse();
 
@@ -876,9 +950,14 @@ public class ProductServiceImpl implements ProductService {
         while(true){
             int dayPrice = 0;
             int dayOrderCount = 0;
-            List<OrderClientSellerIdAndDateResponse> orderProductList =
+			String finalNextDate = nextDate;
+			List<OrderClientSellerIdAndDateResponse> orderProductList = orderCircuitbreaker.run(
+					()->orderServiceClient.findBySellerIdAndOrderProductDateStartingWith(
+							sellerMypageDto.getSellerId(), finalNextDate),
+					throwable -> new ArrayList<>());
+            /*List<OrderClientSellerIdAndDateResponse> orderProductList =
                     orderServiceClient.findBySellerIdAndOrderProductDateStartingWith(
-                            sellerMypageDto.getSellerId(), nextDate);
+                            sellerMypageDto.getSellerId(), nextDate);*/
             for(OrderClientSellerIdAndDateResponse orderProduct : orderProductList){
                 if(!orderList.contains(orderProduct.getOrdersId())){
                     orderList.add(orderProduct.getOrdersId());
@@ -896,9 +975,14 @@ public class ProductServiceImpl implements ProductService {
 
         int dayPrice = 0;
         int dayOrderCount = 0;
-		List<OrderClientSellerIdAndDateResponse> orderProductList =
+		String finalNextDate = nextDate;
+		List<OrderClientSellerIdAndDateResponse> orderProductList = orderCircuitbreaker.run(
+				()->orderServiceClient.findBySellerIdAndOrderProductDateStartingWith(
+						sellerMypageDto.getSellerId(), finalNextDate),
+				throwable -> new ArrayList<>());
+		/*List<OrderClientSellerIdAndDateResponse> orderProductList =
 				orderServiceClient.findBySellerIdAndOrderProductDateStartingWith(
-                        sellerMypageDto.getSellerId(), nextDate);
+                        sellerMypageDto.getSellerId(), nextDate);*/
         for(OrderClientSellerIdAndDateResponse orderProduct : orderProductList){
             if(!orderList.contains(orderProduct.getOrdersId())){
                 orderList.add(orderProduct.getOrdersId());
@@ -994,6 +1078,8 @@ public class ProductServiceImpl implements ProductService {
      */
 	@Override
     public SellerProductQnaResponseResult findSellerQnA(Long sellerId, Integer pageNumber){
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
+
         SellerProductQnaResponseResult sellerProductQnaResponseResult = new SellerProductQnaResponseResult();
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -1007,7 +1093,11 @@ public class ProductServiceImpl implements ProductService {
                     = productRepository.findById(productQna.getProduct().getProductId()).get();
 
             Long userId = productQna.getUserId();
-			UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(userId);
+			UserClientUserShortInfoResponse userClientUserShortInfoResponse
+					= circuitBreaker.run(
+							()->userServiceClient.findUserNameByUserId(userId),
+					throwable -> new UserClientUserShortInfoResponse());
+			//UserClientUserShortInfoResponse userClientUserShortInfoResponse = userServiceClient.findUserNameByUserId(userId);
 
             response.setProductImg(product.getProductMainImgSrc());
             response.setProductName(product.getProductName());

@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.team6.onandthefarmproductservice.vo.product.UserClientUserShortInfoResponse;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,12 +52,15 @@ public class ReviewServiceImpl implements ReviewService {
 	private final DateUtils dateUtils;
 	private final Environment env;
 
+	private final CircuitBreakerFactory circuitBreakerFactory;
+
 	@Autowired ReviewServiceImpl(ReviewRepository reviewRepository, ReviewPagingRepository reviewPagingRepository,
 								 ReviewLikeRepository reviewLikeRepository,
 								 ProductRepository productRepository,
 								 OrderServiceClient orderServiceClient,
 								 UserServiceClient userServiceClient,
-								 DateUtils dateUtils, Environment env){
+								 DateUtils dateUtils, Environment env,
+								 CircuitBreakerFactory circuitBreakerFactory){
 		this.reviewRepository = reviewRepository;
 		this.reviewPagingRepository = reviewPagingRepository;
 		this.reviewLikeRepository = reviewLikeRepository;
@@ -63,16 +69,24 @@ public class ReviewServiceImpl implements ReviewService {
 		this.userServiceClient = userServiceClient;
 		this.dateUtils = dateUtils;
 		this.env = env;
+		this.circuitBreakerFactory=circuitBreakerFactory;
 	}
 
 	public Long saveReview(ReviewFormDto reviewFormDto){
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("order_circuitbreaker");
+
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
 		Review review = modelMapper.map(reviewFormDto, Review.class);
 
 		// Optional<OrderProduct> orderProduct = orderProductRepository.findById(reviewFormDto.getOrderProductId());
-		OrderClientOrderProductIdResponse orderClientOrderProductIdResponse = orderServiceClient.findProductIdByOrderProductId(reviewFormDto.getOrderProductId());
+		OrderClientOrderProductIdResponse orderClientOrderProductIdResponse
+				= circuitBreaker.run(
+						()->orderServiceClient
+								.findProductIdByOrderProductId(reviewFormDto.getOrderProductId()),
+				throwable -> new OrderClientOrderProductIdResponse());
+		//OrderClientOrderProductIdResponse orderClientOrderProductIdResponse = orderServiceClient.findProductIdByOrderProductId(reviewFormDto.getOrderProductId());
 		Long productId = orderClientOrderProductIdResponse.getProductId();
 		Optional<Product> product = productRepository.findById(productId);
 		Long userId = reviewFormDto.getUserId();
@@ -190,6 +204,8 @@ public class ReviewServiceImpl implements ReviewService {
 
 
 	public ReviewSelectionResponseResult getReviewListByLikeCount(Long userId, Long productId, Integer pageNumber){
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
+
 		// msa 고려하여 다시 설계할 것
 		// Product product = productRepository.findById(productId).get();
 		// List<Review> reviews = reviewRepository.findReviewsByProductOrderByReviewLikeCountDesc(product);
@@ -197,6 +213,10 @@ public class ReviewServiceImpl implements ReviewService {
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewLikeCount").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListByLikeCount(pageRequest, productId);
 		for (Review review : reviews) {
+			UserClientUserShortInfoResponse user
+					= circuitBreaker.run(
+							()->userServiceClient.findUserNameByUserId(review.getUserId()),
+					throwable -> new UserClientUserShortInfoResponse());
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse
 					.builder()
 					.reviewId(review.getReviewId())
@@ -205,8 +225,8 @@ public class ReviewServiceImpl implements ReviewService {
 					.reviewModifiedAt(review.getReviewModifiedAt())
 					.reviewLikeCount(review.getReviewLikeCount())
 					.reviewRate(review.getReviewRate())
-					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
-					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
+					.userName(user.getUserName())
+					.userProfileImg(user.getUserProfileImg())
 					.isMyReview(false)
 					.isAvailableUp(true)
 					.build();
@@ -235,12 +255,18 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	public ReviewSelectionResponseResult getReviewListOrderByNewest(Long userId, Long productId, Integer pageNumber) {
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
+
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 
 		Page<Review> reviews = reviewPagingRepository.findReviewListByNewest(pageRequest, productId);
 
 		for (Review review : reviews) {
+			UserClientUserShortInfoResponse user
+					= circuitBreaker.run(
+					()->userServiceClient.findUserNameByUserId(review.getUserId()),
+					throwable -> new UserClientUserShortInfoResponse());
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse
 					.builder()
 					.reviewId(review.getReviewId())
@@ -249,8 +275,8 @@ public class ReviewServiceImpl implements ReviewService {
 					.reviewModifiedAt(review.getReviewModifiedAt())
 					.reviewLikeCount(review.getReviewLikeCount())
 					.reviewRate(review.getReviewRate())
-					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
-					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
+					.userName(user.getUserName())
+					.userProfileImg(user.getUserProfileImg())
 					.isMyReview(false)
 					.isAvailableUp(true)
 					.build();
@@ -278,6 +304,7 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	public ReviewSelectionResponseResult getReviewBySellerNewest(Long sellerId, Integer pageNumber) {
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
 
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListBySeller(pageRequest, sellerId);
@@ -285,6 +312,10 @@ public class ReviewServiceImpl implements ReviewService {
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 
 		for (Review review : reviews) {
+			UserClientUserShortInfoResponse user
+					= circuitBreaker.run(
+					()->userServiceClient.findUserNameByUserId(review.getUserId()),
+					throwable -> new UserClientUserShortInfoResponse());
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse.builder()
 					.reviewId(review.getReviewId())
 					.reviewContent(review.getReviewContent())
@@ -292,11 +323,11 @@ public class ReviewServiceImpl implements ReviewService {
 					.reviewModifiedAt(review.getReviewModifiedAt())
 					.reviewLikeCount(review.getReviewLikeCount())
 					.reviewRate(review.getReviewRate())
-					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
-					.userEmail(userServiceClient.findUserNameByUserId(review.getUserId()).getUserEmail())
+					.userProfileImg(user.getUserProfileImg())
+					.userEmail(user.getUserEmail())
 					.productMainImgSrc(review.getProduct().getProductMainImgSrc())
 					.productName(review.getProduct().getProductName())
-					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
+					.userName(user.getUserName())
 					.build();
 			reviewResponse.add(reviewSelectionResponse);
 		}
@@ -314,12 +345,18 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	public ReviewSelectionResponseResult getMyReview(Long userId, Integer pageNumber) {
+		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
+
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListByUser(pageRequest, userId);
 
 		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 
 		for (Review review : reviews) {
+			UserClientUserShortInfoResponse user
+					= circuitBreaker.run(
+					()->userServiceClient.findUserNameByUserId(review.getUserId()),
+					throwable -> new UserClientUserShortInfoResponse());
 			ReviewSelectionResponse reviewSelectionResponse = ReviewSelectionResponse.builder()
 					.reviewId(review.getReviewId())
 					.reviewContent(review.getReviewContent())
@@ -327,11 +364,11 @@ public class ReviewServiceImpl implements ReviewService {
 					.reviewModifiedAt(review.getReviewModifiedAt())
 					.reviewLikeCount(review.getReviewLikeCount())
 					.reviewRate(review.getReviewRate())
-					.userProfileImg(userServiceClient.findUserNameByUserId(review.getUserId()).getUserProfileImg())
-					.userEmail(userServiceClient.findUserNameByUserId(review.getUserId()).getUserEmail())
+					.userProfileImg(user.getUserProfileImg())
+					.userEmail(user.getUserEmail())
 					.productMainImgSrc(review.getProduct().getProductMainImgSrc())
 					.productName(review.getProduct().getProductName())
-					.userName(userServiceClient.findUserNameByUserId(review.getUserId()).getUserName())
+					.userName(user.getUserName())
 					.isAvailableUp(true)
 					.build();
 			Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByUser(userId, review.getReviewId());
