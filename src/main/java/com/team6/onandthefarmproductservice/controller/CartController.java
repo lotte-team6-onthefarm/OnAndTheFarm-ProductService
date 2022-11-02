@@ -20,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/cart")
+@CrossOrigin(origins = "*")
 public class CartController {
 
     private final CartService cartService;
