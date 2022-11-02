@@ -30,6 +30,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("/api/user/product")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class UserProductController {
 
 	private final ProductService productService;
