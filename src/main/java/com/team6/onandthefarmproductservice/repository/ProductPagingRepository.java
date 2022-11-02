@@ -16,19 +16,19 @@ public interface ProductPagingRepository extends PagingAndSortingRepository<Prod
 	Page<Product> findProductOrderBy(PageRequest pageRequest);
 
 	@Query(value = "select p from Product p join fetch p.category where p.sellerId =:sellerId and p.productStatus ='selling'",
-			countQuery = "select count(p) from Product p")
+			countQuery = "select count(p) from Product p where p.sellerId =:sellerId and p.productStatus ='selling'")
 	Page<Product> findProductBySellerNewest(PageRequest pageRequest, @Param("sellerId") Long sellerId);
 
 	@Query(value = "select p from Product p join fetch p.category where p.sellerId =:sellerId and p.productStatus ='selling'",
-			countQuery = "select count(p) from Product p")
+			countQuery = "select count(p) from Product p where p.sellerId =:sellerId and p.productStatus ='selling' or p.productStatus ='soldout'")
 	Page<Product> findSellingProductBySellerNewest(PageRequest pageRequest, @Param("sellerId") Long sellerId);
 
 	@Query(value = "select p from Product p join fetch p.category where p.sellerId =:sellerId and p.productStatus ='pause'",
-			countQuery = "select count(p) from Product p")
+			countQuery = "select count(p) from Product p where p.sellerId =:sellerId and p.productStatus ='pause'")
 	Page<Product> findPauseProductBySellerNewest(PageRequest pageRequest, @Param("sellerId") Long sellerId);
 
 	@Query(value = "select p from Product p join fetch p.category where p.category.categoryName =:category",
-			countQuery = "select count(p) from Product p")
+			countQuery = "select count(p) from Product p where p.category.categoryName =:category")
 	Page<Product> findProductsByCategoryOrderBy(PageRequest pageRequest, @Param("category") String category);
 
 
