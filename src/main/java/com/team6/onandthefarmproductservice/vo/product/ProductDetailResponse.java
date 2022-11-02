@@ -41,7 +41,6 @@ public class ProductDetailResponse {
 	private Integer productWishCount;
 	private Integer productSoldCount;
 	private boolean productWishStatus;
-
 	private boolean productCartStatus;
 	private Integer productViewCount;
 
@@ -50,6 +49,8 @@ public class ProductDetailResponse {
 	private Double reviewRate;
 
 	private List<ProductImageResponse> productImageList;
+
+	private Long feedNumber;
 
 	public ProductDetailResponse(Product product, SellerClientSellerDetailResponse sellerClientSellerDetailResponse) {
 		this.productId = product.getProductId();

@@ -2,18 +2,13 @@ package com.team6.onandthefarmproductservice.controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.team6.onandthefarmproductservice.dto.product.ProductWishCancelDto;
 import com.team6.onandthefarmproductservice.dto.product.ProductWishFormDto;
@@ -114,14 +109,22 @@ public class UserProductController {
 
 	@GetMapping(value = "/detail/{product-id}")
 	@ApiOperation(value = "상품 단건 조회")
-	public ResponseEntity<ProductDetailResponse> findProductDetail(@ApiIgnore Principal principal, @PathVariable("product-id") Long productId) {
+	public ResponseEntity<ProductDetailResponse> findProductDetail(@ApiIgnore Principal principal,
+																   @PathVariable("product-id") Long productId,
+																   @RequestParam Map<String, String> request) {
 
 		Long userId = null;
 		if (principal != null){
 			String[] principalInfo = principal.getName().split(" ");
 			userId = Long.parseLong(principalInfo[0]);
 		}
-		ProductDetailResponse product = productService.findProductDetail(productId, userId);
+
+		Long feedNumber = null;
+		if(request.containsKey("number")){
+			feedNumber = Long.parseLong(request.get("number"));
+		}
+
+		ProductDetailResponse product = productService.findProductDetail(productId, userId, feedNumber);
 
 		BaseResponse baseReponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)

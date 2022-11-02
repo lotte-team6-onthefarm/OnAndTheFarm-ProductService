@@ -300,7 +300,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ProductDetailResponse findProductDetail(Long productId, Long userId) {
+	public ProductDetailResponse findProductDetail(Long productId, Long userId, Long feedNumber) {
 		Product product = productRepository.findById(productId).get();
 		product.setProductViewCount(product.getProductViewCount()+1);
 		Long sellerId = productRepository.findById(productId).get().getSellerId();
@@ -319,6 +319,9 @@ public class ProductServiceImpl implements ProductService {
 				productDetailResponse.setProductCartStatus(true);
 			}
 		}
+
+		// feedOriginalNumber
+		productDetailResponse.setFeedNumber(feedNumber);
 
 		List<ProductImg> productImgList = productImgRepository.findByProduct(product);
 		List<ProductImageResponse> productImgSrcList = new ArrayList<>();
