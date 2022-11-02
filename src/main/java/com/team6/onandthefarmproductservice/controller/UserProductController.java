@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import com.team6.onandthefarmproductservice.vo.product.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpStatus;
@@ -15,13 +16,6 @@ import com.team6.onandthefarmproductservice.dto.product.ProductWishFormDto;
 import com.team6.onandthefarmproductservice.dto.product.ProductWishResultDto;
 import com.team6.onandthefarmproductservice.service.ProductService;
 import com.team6.onandthefarmproductservice.util.BaseResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductDetailResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductQnAInfoResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductQnAResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponse;
-import com.team6.onandthefarmproductservice.vo.product.ProductSelectionResponseResult;
-import com.team6.onandthefarmproductservice.vo.product.ProductWishCancelRequest;
-import com.team6.onandthefarmproductservice.vo.product.ProductWishFormRequest;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -357,21 +351,16 @@ public class UserProductController {
 
 	@GetMapping("/QnA/{product-no}")
 	@ApiOperation(value = "상품에 대한 질의 조회")
-	public ResponseEntity<BaseResponse<ProductQnAInfoResponse>> findProductQnAList(
-			@PathVariable("product-no") Long productId) {
+	public ResponseEntity<BaseResponse<ProductQnAResponseResult>> findProductQnAList(
+			@PathVariable("product-no") Long productId, @RequestParam Integer pageNumber) {
 
-		List<ProductQnAResponse> products
-				= productService.findProductQnAList(productId);
-
-		ProductQnAInfoResponse productQnAInfoResponse = ProductQnAInfoResponse.builder()
-				.productQnAResponseList(products)
-				.qnACount(products.size())
-				.build();
+		ProductQnAResponseResult qnAList
+				= productService.findProductQnAList(productId,pageNumber);
 
 		BaseResponse baseResponse = BaseResponse.builder()
 				.httpStatus(HttpStatus.OK)
 				.message("OK")
-				.data(productQnAInfoResponse)
+				.data(qnAList)
 				.build();
 
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
