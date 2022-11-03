@@ -17,4 +17,6 @@ public class SellerRecentReviewResponse {
     private String productImg;
 
     private String productName;
+
+    private Long productId;
 }

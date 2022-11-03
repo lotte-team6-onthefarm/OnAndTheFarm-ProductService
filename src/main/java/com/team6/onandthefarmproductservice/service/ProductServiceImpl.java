@@ -1021,6 +1021,7 @@ public class ProductServiceImpl implements ProductService {
                         .reviewContent(review.getReviewContent())
                         .reviewRate(review.getReviewRate())
                         .reviewLikeCount(review.getReviewLikeCount())
+						.productId(product.getProductId())
                         .build();
                 responses.add(response);
             }
@@ -1035,6 +1036,7 @@ public class ProductServiceImpl implements ProductService {
                         .reviewContent(review.getReviewContent())
                         .reviewRate(review.getReviewRate())
                         .reviewLikeCount(review.getReviewLikeCount())
+						.productId(product.getProductId())
                         .build();
                 responses.add(response);
             }

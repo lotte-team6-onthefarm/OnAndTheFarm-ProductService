@@ -13,4 +13,6 @@ public class SellerPopularProductResponse {
     private String productName;
 
     private Integer productWishCount;
+
+    private Long productId;
 }
