@@ -3,6 +3,7 @@ package com.team6.onandthefarmproductservice.controller;
 import java.security.Principal;
 import java.util.List;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ public class SellerReviewController {
 	private final ReviewService reviewService;
 
 	@GetMapping("/list/by-seller/{page-no}")
+	@ApiOperation("셀러 별 자신이 등록한 상품에 대한 리뷰 조회")
 	public ResponseEntity<BaseResponse<ReviewSelectionResponseResult>> getReviewBySellerNewest(@ApiIgnore Principal principal, @PathVariable("page-no") String pageNumber){
 
 		if(principal == null){
