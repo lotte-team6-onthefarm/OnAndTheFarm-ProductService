@@ -623,28 +623,26 @@ public class ProductServiceImpl implements ProductService {
 		});
 
 		int startIndex = pageNumber * pageContentNumber;
-
 		int size = responses.size();
 
-
-		if (size < startIndex + pageContentNumber) {
+		if(size < startIndex){
+			resultResponse.setProductQnAResponseList(responses.subList(0, 0));
+		}
+		else if (size < startIndex + pageContentNumber) {
 			resultResponse.setProductQnAResponseList(responses.subList(startIndex, size));
-			resultResponse.setCurrentPageNum(pageNumber);
-			if (size % pageContentNumber != 0) {
-				resultResponse.setTotalPageNum((size / pageContentNumber) + 1);
-			} else {
-				resultResponse.setTotalPageNum(size / pageContentNumber);
-			}
-			return resultResponse;
+		}
+		else {
+			resultResponse.setProductQnAResponseList(responses.subList(startIndex, startIndex + pageContentNumber));
 		}
 
-		resultResponse.setProductQnAResponseList(responses.subList(startIndex, startIndex + pageContentNumber));
 		resultResponse.setCurrentPageNum(pageNumber);
+		resultResponse.setTotalElementNum(size);
 		if (size % pageContentNumber != 0) {
 			resultResponse.setTotalPageNum((size / pageContentNumber) + 1);
 		} else {
 			resultResponse.setTotalPageNum(size / pageContentNumber);
 		}
+
 		return resultResponse;
 	}
 

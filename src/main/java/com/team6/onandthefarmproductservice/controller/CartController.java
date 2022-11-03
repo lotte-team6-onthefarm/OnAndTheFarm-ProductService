@@ -148,7 +148,7 @@ public class CartController {
 
     @GetMapping
     @ApiOperation(value = "장바구니 조회")
-    public ResponseEntity<BaseResponse<List<CartResponse>>> selectCart(@ApiIgnore Principal principal){
+    public ResponseEntity<BaseResponse<CartResult>> selectCart(@ApiIgnore Principal principal, @RequestParam Integer pageNumber){
 
         if(principal == null){
             BaseResponse baseResponse = BaseResponse.builder()
@@ -159,9 +159,9 @@ public class CartController {
         }
 
         String[] principalInfo = principal.getName().split(" ");
-
         Long userId = Long.parseLong(principalInfo[0]);
-        List<CartResponse> cartResponses = cartService.selectCart(userId);
+
+        CartResult cartResponses = cartService.selectCart(userId, pageNumber);
 
         BaseResponse baseResponse = BaseResponse.builder()
                 .httpStatus(HttpStatus.CREATED)

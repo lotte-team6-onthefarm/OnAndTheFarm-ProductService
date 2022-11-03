@@ -206,12 +206,21 @@ public class ReviewServiceImpl implements ReviewService {
 	public ReviewSelectionResponseResult getReviewListByLikeCount(Long userId, Long productId, Integer pageNumber){
 		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
 
-		// msa 고려하여 다시 설계할 것
-		// Product product = productRepository.findById(productId).get();
-		// List<Review> reviews = reviewRepository.findReviewsByProductOrderByReviewLikeCountDesc(product);
-		List<ReviewSelectionResponse> reviewResponses = new ArrayList<>();
+		ReviewSelectionResponseResult reviewSelectionResponseResult = new ReviewSelectionResponseResult();
+
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewLikeCount").descending());
-		Page<Review> reviews = reviewPagingRepository.findReviewListByLikeCount(pageRequest, productId);
+		Page<Review> reviews = reviewPagingRepository.findReviewListOrderBy(pageRequest, productId);
+
+		int totalPage = reviews.getTotalPages();
+		Long totalElements = reviews.getTotalElements();
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+		reviewSelectionResponseResult.setPageVo(pageVo);
+
+		List<ReviewSelectionResponse> reviewResponses = new ArrayList<>();
 		for (Review review : reviews) {
 			UserClientUserShortInfoResponse user
 					= circuitBreaker.run(
@@ -240,28 +249,29 @@ public class ReviewServiceImpl implements ReviewService {
 			}
 			reviewResponses.add(reviewSelectionResponse);
 		}
+		reviewSelectionResponseResult.setReviewSelectionResponses(reviewResponses);
 
-		PageVo pageVo = PageVo.builder()
-				.totalPage(reviews.getTotalPages())
-				.nowPage(pageNumber)
-				.totalElement(reviews.getTotalElements())
-				.build();
-
-		ReviewSelectionResponseResult reviewSelectionResponseResult = ReviewSelectionResponseResult.builder()
-				.reviewSelectionResponses(reviewResponses)
-				.pageVo(pageVo)
-				.build();
 		return reviewSelectionResponseResult;
 	}
 
 	public ReviewSelectionResponseResult getReviewListOrderByNewest(Long userId, Long productId, Integer pageNumber) {
 		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
 
-		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
+		ReviewSelectionResponseResult reviewSelectionResponseResult = new ReviewSelectionResponseResult();
+
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
+		Page<Review> reviews = reviewPagingRepository.findReviewListOrderBy(pageRequest, productId);
 
-		Page<Review> reviews = reviewPagingRepository.findReviewListByNewest(pageRequest, productId);
+		int totalPage = reviews.getTotalPages();
+		Long totalElements = reviews.getTotalElements();
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+		reviewSelectionResponseResult.setPageVo(pageVo);
 
+		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 		for (Review review : reviews) {
 			UserClientUserShortInfoResponse user
 					= circuitBreaker.run(
@@ -281,7 +291,7 @@ public class ReviewServiceImpl implements ReviewService {
 					.isAvailableUp(true)
 					.build();
 
-			if(review.getUserId() == userId){
+			if(review.getUserId().equals(userId)){
 				reviewSelectionResponse.setIsMyReview(true);
 			}
 			Optional<ReviewLike> reviewLike = reviewLikeRepository.findReviewLikeByUser(userId, review.getReviewId());
@@ -290,15 +300,7 @@ public class ReviewServiceImpl implements ReviewService {
 			}
 			reviewResponse.add(reviewSelectionResponse);
 		}
-		PageVo pageVo = PageVo.builder()
-				.totalPage(reviews.getTotalPages())
-				.nowPage(pageNumber)
-				.totalElement(reviews.getTotalElements())
-				.build();
-		ReviewSelectionResponseResult reviewSelectionResponseResult =ReviewSelectionResponseResult.builder()
-				.reviewSelectionResponses(reviewResponse)
-				.pageVo(pageVo)
-				.build();
+		reviewSelectionResponseResult.setReviewSelectionResponses(reviewResponse);
 
 		return reviewSelectionResponseResult;
 	}
@@ -306,11 +308,21 @@ public class ReviewServiceImpl implements ReviewService {
 	public ReviewSelectionResponseResult getReviewBySellerNewest(Long sellerId, Integer pageNumber) {
 		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
 
+		ReviewSelectionResponseResult reviewSelectionResponseResult = new ReviewSelectionResponseResult();
+
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListBySeller(pageRequest, sellerId);
 
-		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
+		int totalPage = reviews.getTotalPages();
+		Long totalElements = reviews.getTotalElements();
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+		reviewSelectionResponseResult.setPageVo(pageVo);
 
+		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 		for (Review review : reviews) {
 			UserClientUserShortInfoResponse user
 					= circuitBreaker.run(
@@ -331,15 +343,7 @@ public class ReviewServiceImpl implements ReviewService {
 					.build();
 			reviewResponse.add(reviewSelectionResponse);
 		}
-		PageVo pageVo = PageVo.builder()
-				.totalPage(reviews.getTotalPages())
-				.nowPage(pageNumber)
-				.totalElement(reviews.getTotalElements())
-				.build();
-		ReviewSelectionResponseResult reviewSelectionResponseResult =ReviewSelectionResponseResult.builder()
-				.reviewSelectionResponses(reviewResponse)
-				.pageVo(pageVo)
-				.build();
+		reviewSelectionResponseResult.setReviewSelectionResponses(reviewResponse);
 
 		return reviewSelectionResponseResult;
 	}
@@ -347,11 +351,21 @@ public class ReviewServiceImpl implements ReviewService {
 	public ReviewSelectionResponseResult getMyReview(Long userId, Integer pageNumber) {
 		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("user_circuitbreaker");
 
+		ReviewSelectionResponseResult reviewSelectionResponseResult = new ReviewSelectionResponseResult();
+
 		PageRequest pageRequest = PageRequest.of(pageNumber, 8, Sort.by("reviewCreatedAt").descending());
 		Page<Review> reviews = reviewPagingRepository.findReviewListByUser(pageRequest, userId);
 
-		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
+		int totalPage = reviews.getTotalPages();
+		Long totalElements = reviews.getTotalElements();
+		PageVo pageVo = PageVo.builder()
+				.totalPage(totalPage)
+				.nowPage(pageNumber)
+				.totalElement(totalElements)
+				.build();
+		reviewSelectionResponseResult.setPageVo(pageVo);
 
+		List<ReviewSelectionResponse> reviewResponse = new ArrayList<>();
 		for (Review review : reviews) {
 			UserClientUserShortInfoResponse user
 					= circuitBreaker.run(
@@ -377,15 +391,7 @@ public class ReviewServiceImpl implements ReviewService {
 			}
 			reviewResponse.add(reviewSelectionResponse);
 		}
-		PageVo pageVo = PageVo.builder()
-				.totalPage(reviews.getTotalPages())
-				.nowPage(pageNumber)
-				.totalElement(reviews.getTotalElements())
-				.build();
-		ReviewSelectionResponseResult reviewSelectionResponseResult =ReviewSelectionResponseResult.builder()
-				.reviewSelectionResponses(reviewResponse)
-				.pageVo(pageVo)
-				.build();
+		reviewSelectionResponseResult.setReviewSelectionResponses(reviewResponse);
 
 		return reviewSelectionResponseResult;
 	}
