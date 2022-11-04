@@ -142,7 +142,7 @@ public class ProductServiceClientControllerEX {
     }
 
     //member Id로 wish-list를 불러오는 메서드
-    @PostMapping("/api/user/product/product-service/wish-list/{user-no}")
+    @GetMapping("/api/user/product/product-service/wish-list/{user-no}")
     public List<WishVo> findWishListByMemberId(@PathVariable("user-no")Long memberId){
         return productServiceClientService.getWishListByMemberId(memberId);
     }
