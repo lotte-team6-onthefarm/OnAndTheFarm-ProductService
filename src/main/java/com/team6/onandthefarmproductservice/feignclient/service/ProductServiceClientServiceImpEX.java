@@ -26,6 +26,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -202,7 +203,13 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         log.info("Cancel Stock :" + id);
     }
 
-    public List<WishVo> getWishListByMemberId(WishPageVo wishPageVo, Long memberId){
+    public List<WishVo> getWishListByMemberId(Long memberId){
+        PageRequest pageRequest = PageRequest.of(0, 8, Sort.by("wishId").descending());
+        WishPageVo wishPageVo = WishPageVo.builder()
+                .pageNumber(0)
+                .pageRequest(pageRequest)
+                .build();
+
         Page<Wish> wishs = productWishRepository.findWishListPageByUserId(wishPageVo.getPageRequest(), memberId);
         List<WishVo> wishVos = new ArrayList<>();
         for (Wish wish : wishs) {
