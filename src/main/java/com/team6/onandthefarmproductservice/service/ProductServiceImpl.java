@@ -843,6 +843,8 @@ public class ProductServiceImpl implements ProductService {
 			}
 			response.setUserName(userClientUserShortInfoResponse.getUserName());
 			response.setUserProfileImg(userClientUserShortInfoResponse.getUserProfileImg());
+			response.setProductName(productQna.getProduct().getProductName());
+			response.setProductImg(productQna.getProduct().getProductMainImgSrc());
 			responses.add(response);
 		}
 

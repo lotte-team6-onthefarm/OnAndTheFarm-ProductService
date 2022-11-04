@@ -30,4 +30,7 @@ public class ProductQnAResponse {
 
     private String userProfileImg;
 
+    private String productName;
+
+    private String productImg;
 }
