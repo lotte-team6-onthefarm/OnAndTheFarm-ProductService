@@ -29,7 +29,7 @@ public interface ProductServiceClientServiceEX {
 
     void cancelOrder(Long id);
 
-    List<WishVo> getWishListByMemberId(WishPageVo wishPageVo, Long memberId);
+    List<WishVo> getWishListByMemberId(Long memberId);
 
     ProductVo getProductVoByProductId(Long productId);
 }
