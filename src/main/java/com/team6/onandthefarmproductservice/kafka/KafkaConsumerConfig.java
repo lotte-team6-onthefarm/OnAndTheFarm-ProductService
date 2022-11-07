@@ -39,7 +39,7 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String,String> consumerFactory(){
         Map<String,Object> properties = new HashMap<>();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,kafkaUrl);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG,"consumerGroupId");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG,"product-group");
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,false);
