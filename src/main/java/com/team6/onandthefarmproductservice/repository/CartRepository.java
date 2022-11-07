@@ -18,4 +18,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     @Query("select c from Cart c where c.userId =:userId and c.product.productId=:productId and c.cartStatus is true")
     Optional<Cart> findNotDeletedCartByProduct(@Param("productId") Long productId, @Param("userId") Long userId);
+
+    boolean existsByUserIdAndProduct_ProductId(Long userId,Long productId);
 }

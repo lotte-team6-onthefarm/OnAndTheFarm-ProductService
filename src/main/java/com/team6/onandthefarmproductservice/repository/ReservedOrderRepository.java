@@ -9,4 +9,5 @@ public interface ReservedOrderRepository extends CrudRepository<ReservedOrder,Lo
 
     List<ReservedOrder> findByOrderSerialAndIdempoStatus(String orderSerial, Boolean status);
 
+    boolean existsByReservedOrderIdAndIdempoStatus(Long id, Boolean status);
 }

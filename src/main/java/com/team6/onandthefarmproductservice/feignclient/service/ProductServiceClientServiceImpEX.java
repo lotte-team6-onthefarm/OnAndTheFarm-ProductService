@@ -136,7 +136,7 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
                 .productList(productList)
                 .orderSerial(orderSerial)
                 .createdDate(LocalDateTime.now())
-                .expireTime(LocalDateTime.now().plus(3l, ChronoUnit.SECONDS))
+                .expireTime(LocalDateTime.now().plus(10l, ChronoUnit.SECONDS))
                 .idempoStatus(false)
                 .build();
         return reservedOrderRepository.save(reservedOrder);

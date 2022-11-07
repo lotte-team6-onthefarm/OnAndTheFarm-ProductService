@@ -308,7 +308,7 @@ public class ProductServiceImpl implements ProductService {
 		CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
 		Product product = productRepository.findById(productId).get();
 		product.setProductViewCount(product.getProductViewCount()+1);
-		Long sellerId = productRepository.findById(productId).get().getSellerId();
+		Long sellerId = product.getSellerId();
 		SellerClientSellerDetailResponse sellerClientSellerDetailResponse
 				= circuitBreaker.run(
 						()->sellerServiceClient.findBySellerId(sellerId),
@@ -318,13 +318,15 @@ public class ProductServiceImpl implements ProductService {
 		ProductDetailResponse productDetailResponse = new ProductDetailResponse(product, sellerClientSellerDetailResponse);
 		productDetailResponse.setProductViewCount(productDetailResponse.getProductViewCount()+1);
 		if(userId != null){
-			Optional<Wish> savedWish = productWishRepository.findWishByUserAndProduct(userId, productId);
-			if(savedWish.isPresent()){
+			//Optional<Wish> savedWish = productWishRepository.findWishByUserAndProduct(userId, productId);
+			boolean savedWish = productWishRepository.existsByUserIdAndProduct_ProductId(userId,productId);
+			if(savedWish){
 				productDetailResponse.setProductWishStatus(true);
 			}
 
-			Optional<Cart> savedCart = cartRepository.findNotDeletedCartByProduct(productId, userId);
-			if(savedCart.isPresent()){
+			//Optional<Cart> savedCart = cartRepository.findNotDeletedCartByProduct(productId, userId);
+			boolean savedCart = cartRepository.existsByUserIdAndProduct_ProductId(userId,productId);
+			if(savedCart){
 				productDetailResponse.setProductCartStatus(true);
 			}
 		}
@@ -1173,10 +1175,10 @@ public class ProductServiceImpl implements ProductService {
 	 */
 	public boolean isAlreadyProcessedOrderId(String orderId) {
 		// 처리된 메시지가 있는지 확인
-		List<ReservedOrder> reservedOrders
-				= reservedOrderRepository.findByOrderSerialAndIdempoStatus(orderId,true);
+		boolean result
+				= reservedOrderRepository.existsByReservedOrderIdAndIdempoStatus(Long.valueOf(orderId),true);
 
-		if(reservedOrders.isEmpty()){ // 처리된 메시지가 없는 경우 중복되지 않은 메시지
+		if(!result){ // 처리된 메시지가 없는 경우 중복되지 않은 메시지
 			return true; //
 		}
 
