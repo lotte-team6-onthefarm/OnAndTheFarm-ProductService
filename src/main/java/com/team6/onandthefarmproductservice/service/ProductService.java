@@ -49,7 +49,7 @@ public interface ProductService {
 	
     ProductDetailResponse findProductDetail(Long productId, Long userId, Long feedNumber);
 
-    void updateStockAndSoldCount(ProductStockDto productStockDto);
+    void updateStockAndSoldCount(ProductStockDto productStockDto,String orderSerial);
 
     Boolean createProductQnA(UserQnaDto userQnaDto);
 

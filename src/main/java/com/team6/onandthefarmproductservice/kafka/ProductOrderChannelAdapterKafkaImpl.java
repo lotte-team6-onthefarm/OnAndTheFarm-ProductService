@@ -45,7 +45,7 @@ public class ProductOrderChannelAdapterKafkaImpl implements ProductOrderChannelA
 
         //Long test = Long.valueOf("adsads");
         for(ProductStockDto productStockDto : kafkaConfirmOrderDto.getProductStockDtos()){
-            productService.updateStockAndSoldCount(productStockDto);
+            productService.updateStockAndSoldCount(productStockDto,kafkaConfirmOrderDto.getOrderSerial());
         }
         // Kafka Offset Manual Commit(수동커밋)
         ack.acknowledge();

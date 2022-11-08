@@ -784,7 +784,7 @@ public class ProductServiceImpl implements ProductService {
 		return productReviewResponseList;
 	}
 
-	public void updateStockAndSoldCount(ProductStockDto productStockDto){
+	public void updateStockAndSoldCount(ProductStockDto productStockDto,String orderSerial){
 		Long productId = productStockDto.getProductId();
 		Integer productQty = productStockDto.getProductQty();
 
@@ -796,6 +796,7 @@ public class ProductServiceImpl implements ProductService {
 		if(product.getProductSoldCount()==0){
 			product.setProductStatus("soldout");
 		}
+		reservedOrderRepository.findByOrderSerial(orderSerial).get().setIdempoStatus(true);
 	}
 
 	@Override
