@@ -1089,7 +1089,7 @@ public class ProductServiceImpl implements ProductService {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-		List<ProductQna> productQnas = productQnaRepository.findBySellerId(sellerId);
+		List<ProductQna> productQnas = productQnaRepository.findBySellerIdAndStatus(sellerId);
         List<SellerProductQnaResponse> sellerProductQnaResponses = new ArrayList<>();
         for(ProductQna productQna : productQnas){
             SellerProductQnaResponse response
