@@ -1068,6 +1068,7 @@ public class ProductServiceImpl implements ProductService {
         for(Product product : products){
             SellerPopularProductResponse response =
                     modelMapper.map(product,SellerPopularProductResponse.class);
+			response.setProductImg(product.getProductMainImgSrc());
             responses.add(response);
         }
         if(responses.size()<listNum){
