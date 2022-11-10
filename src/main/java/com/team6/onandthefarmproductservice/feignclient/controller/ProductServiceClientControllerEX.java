@@ -50,7 +50,7 @@ public class ProductServiceClientControllerEX {
      * @param productId
      * @return
      */
-    @GetMapping("/api/user/product/product-service/{product-no}")
+    @GetMapping("/api/feign/user/product/product-service/{product-no}")
     public ProductVo findByProductId(@PathVariable("product-no") Long productId){
         return productServiceClientService.findByProductId(productId);
     }
@@ -60,16 +60,16 @@ public class ProductServiceClientControllerEX {
      * @param sellerId
      * @return
      */
-    @GetMapping("/api/user/product/product-service/no-selling/{seller-no}")
+    @GetMapping("/api/feign/user/product/product-service/no-selling/{seller-no}")
     List<ProductVo> findNotSellingProduct(@PathVariable("seller-no") Long sellerId){
         return productServiceClientService.findNotSellingProduct(sellerId);
     }
-    @GetMapping("/api/user/product/product-service/selling/{seller-no}")
+    @GetMapping("/api/feign/user/product/product-service/selling/{seller-no}")
     List<ProductVo> findSellingProduct(@PathVariable("seller-no") Long sellerId){
         return productServiceClientService.findSellingProduct(sellerId);
     }
 
-    @GetMapping("/api/user/product/product-service/qna/{seller-no}")
+    @GetMapping("/api/feign/user/product/product-service/qna/{seller-no}")
     List<ProductQnaVo> findBeforeAnswerProductQna(@PathVariable("seller-no") Long sellerId){
         return productServiceClientService.findBeforeAnswerProductQna(sellerId);
     }
@@ -79,7 +79,7 @@ public class ProductServiceClientControllerEX {
      * @param map : 주문 정보를 가진 객체 productIdList : List<OrderProduct>
      * @return participantLink객체를 리턴하며, confirm을 위한 url이 존재한다.
      */
-    @PostMapping("/api/user/product/product-service/order-try")
+    @PostMapping("/api/feign/user/product/product-service/order-try")
     public ResponseEntity<ParticipantLink> orderTry(@RequestBody Map<String, Object> map){
         String productList = "";
         String orderSerial = "";
@@ -108,7 +108,7 @@ public class ProductServiceClientControllerEX {
      * @param id
      * @return
      */
-    @PutMapping("/api/user/product/product-service/order-try/{id}")
+    @PutMapping("/api/feign/user/product/product-service/order-try/{id}")
     public ResponseEntity<Void> confirmOrderAdjustment(@PathVariable Long id) {
         try {
             productServiceClientService.confirmOrder(id);
@@ -135,19 +135,19 @@ public class ProductServiceClientControllerEX {
      * @param id
      * @return
      */
-    @DeleteMapping("/api/user/product/product-service/order-try/{id}")
+    @DeleteMapping("/api/feign/user/product/product-service/order-try/{id}")
     public ResponseEntity<Void> cancelOrderAdjustment(@PathVariable Long id) {
         productServiceClientService.cancelOrder(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     //member Id로 wish-list를 불러오는 메서드
-    @GetMapping("/api/user/product/product-service/wish-list/{user-no}")
+    @GetMapping("/api/feign/user/product/product-service/wish-list/{user-no}")
     public List<WishVo> findWishListByMemberId(@PathVariable("user-no")Long memberId){
         return productServiceClientService.getWishListByMemberId(memberId);
     }
     //product Id로 product 불러오는 메서드
-    @GetMapping("/api/user/product/product-service/product/{product-no}")
+    @GetMapping("/api/feign/user/product/product-service/product/{product-no}")
     public ProductVo findProductByProductId(@PathVariable("product-no") Long productId){
         return productServiceClientService.getProductVoByProductId(productId);
     }
