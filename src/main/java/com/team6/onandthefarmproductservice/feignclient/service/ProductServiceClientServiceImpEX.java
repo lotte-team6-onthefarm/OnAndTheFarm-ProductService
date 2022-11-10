@@ -133,8 +133,8 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
         ReservedOrder reservedOrder = ReservedOrder.builder()
                 .productList(productList)
                 .orderSerial(orderSerial)
-                .createdDate(LocalDateTime.now())
-                .expireTime(LocalDateTime.now().plus(10l, ChronoUnit.SECONDS))
+                .createdDate(LocalDateTime.now().toString())
+                .expireTime(LocalDateTime.now().plus(10l, ChronoUnit.SECONDS).toString())
                 .idempoStatus(false)
                 .build();
         return reservedOrderRepository.save(reservedOrder);
