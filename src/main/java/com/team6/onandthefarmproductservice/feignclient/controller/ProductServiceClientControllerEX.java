@@ -119,7 +119,7 @@ public class ProductServiceClientControllerEX {
      * @param expire : timeout 시간의미
      * @return location은 confirm시 사용될 url이다.ParticipantLink
      */
-    private ParticipantLink buildParticipantLink(final Long id, LocalDateTime expire) {
+    private ParticipantLink buildParticipantLink(final Long id, String expire) {
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
         return new ParticipantLink(location, expire);
     }
