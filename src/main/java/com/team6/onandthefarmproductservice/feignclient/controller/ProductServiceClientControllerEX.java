@@ -3,20 +3,14 @@ package com.team6.onandthefarmproductservice.feignclient.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team6.onandthefarmproductservice.ParticipantLink;
-import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.entity.ReservedOrder;
 import com.team6.onandthefarmproductservice.feignclient.service.ProductServiceClientServiceEX;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
-import com.team6.onandthefarmproductservice.service.ProductService;
 import com.team6.onandthefarmproductservice.vo.WishVo;
-import com.team6.onandthefarmproductservice.vo.product.WishPageVo;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +20,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -151,4 +146,18 @@ public class ProductServiceClientControllerEX {
     public ProductVo findProductByProductId(@PathVariable("product-no") Long productId){
         return productServiceClientService.getProductVoByProductId(productId);
     }
+
+    //product Id로 List<Review> 를 불러오는 메서드
+    @GetMapping("/api/feign/user/product/product-service/reviews-info-response/{product-no}")
+    public ReviewInfoToExbt getReviewsInfoProductId(@PathVariable("product-no") Long productId){
+        return productServiceClientService.getReviewInfoByProductId(productId);
+    }
+
+    //productId, userId로 wish 가져오는 메서드
+    @GetMapping("/api/feign/user/product/product-service/wish")
+    public Optional<WishVo> getWishByProductUserId(Long productId, Long userId){
+        return productServiceClientService.getWishByProductUserId(productId,userId);
+    }
+
+    //빨간거 만드는데부터 시작
 }
