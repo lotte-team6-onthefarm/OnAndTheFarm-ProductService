@@ -10,9 +10,9 @@ import com.team6.onandthefarmproductservice.vo.product.UserClientUserShortInfoRe
 @FeignClient(name = "member-service", contextId = "member-service-user")
 public interface UserServiceClient {
 
-	@GetMapping("/api/user/members/member-service/short-info/{user-no}")
+	@GetMapping("/api/feign/user/members/member-service/short-info/{user-no}")
 	UserClientUserShortInfoResponse findUserNameByUserId(@PathVariable("user-no") Long userId);
 
-	@GetMapping("/api/user/members/member-service/{user-no}")
+	@GetMapping("/api/feign/user/members/member-service/{user-no}")
 	UserVo findByUserId(@PathVariable("user-no") Long userId);
 }

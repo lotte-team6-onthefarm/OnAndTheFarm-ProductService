@@ -22,17 +22,17 @@ public class SnsServiceClientController {
         this.snsServiceClientService = snsServiceClientService;
     }
 
-    @GetMapping("/api/user/product/product-service/wish/{user-no}")
+    @GetMapping("/api/feign/user/product/product-service/wish/{user-no}")
     public List<WishListResponse> findWishProductListByMember(@PathVariable("user-no") Long memberId){
         return snsServiceClientService.findWishProductListByMember(memberId);
     }
 
-    @GetMapping("/api/seller/product/product-service/product/list/{seller-no}")
+    @GetMapping("/api/feign/seller/product/product-service/product/list/{seller-no}")
     List<ProductVo> findBySellerId(@PathVariable("seller-no") Long sellerId){
         return snsServiceClientService.findBySellerId(sellerId);
     }
 
-    @GetMapping("/api/user/product/product-service/review/{product-no}")
+    @GetMapping("/api/feign/user/product/product-service/review/{product-no}")
     List<ReviewVo> findReviewByProductId(@PathVariable("product-no") Long productId){
         return snsServiceClientService.findReviewByProductId(productId);
     }

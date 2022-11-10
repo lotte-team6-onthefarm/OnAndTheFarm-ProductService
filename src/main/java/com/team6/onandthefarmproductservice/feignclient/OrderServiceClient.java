@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "order-service")
 public interface OrderServiceClient {
 
-	@GetMapping("/api/user/orders/order-service/review-available/{user-no}")
+	@GetMapping("/api/feign/user/orders/order-service/review-available/{user-no}")
 	List<OrdersByUserResponse> findProductWithoutReview(@PathVariable("user-no") Long userId);
 
-	@GetMapping("/api/user/orders/order-service/order-product/{orders-no}")
+	@GetMapping("/api/feign/user/orders/order-service/order-product/{orders-no}")
 	List<OrderClientOrderProductIdResponse> findByOrdersId(@PathVariable("orders-no") Long ordersId);
 
-	@GetMapping("/api/user/orders/order-product/{order-product-no}")
+	@GetMapping("/api/feign/user/orders/order-product/{order-product-no}")
 	OrderClientOrderProductIdResponse findProductIdByOrderProductId(@PathVariable("order-product-no") Long orderProductId);
 
-	@GetMapping("/api/user/orders/order-service/order-product/orders-list")
+	@GetMapping("/api/feign/user/orders/order-service/order-product/orders-list")
 	List<OrderClientSellerIdAndDateResponse> findBySellerIdAndOrderProductDateStartingWith(@RequestParam Long sellerId, @RequestParam String nextDate);
 
 }
