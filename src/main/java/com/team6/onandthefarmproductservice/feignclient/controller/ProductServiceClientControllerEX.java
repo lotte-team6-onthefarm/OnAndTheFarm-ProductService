@@ -153,11 +153,16 @@ public class ProductServiceClientControllerEX {
         return productServiceClientService.getReviewInfoByProductId(productId);
     }
 
-    //productId, userId로 wish 가져오는 메서드
+    //productId, userId로 wish 존재 여부 가져오는 메서드
     @GetMapping("/api/feign/user/product/product-service/wish")
-    public Optional<WishVo> getWishByProductUserId(Long productId, Long userId){
+    public boolean getWishByProductUserId(Long productId, Long userId){
         return productServiceClientService.getWishByProductUserId(productId,userId);
     }
 
-    //빨간거 만드는데부터 시작
+    //productId, userId로 cart 존재여부 가져오는 메서드
+    @GetMapping("/api/feign/user/product/product-service/cart")
+    public boolean getCartByProductUserId(Long productId, Long userId){
+        return productServiceClientService.getCartByProductUserId(productId, userId);
+    }
+
 }

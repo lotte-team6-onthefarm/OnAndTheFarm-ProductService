@@ -34,4 +34,8 @@ public interface ProductServiceClientServiceEX {
     ProductVo getProductVoByProductId(Long productId);
 
     ReviewInfoToExbt getReviewInfoByProductId(Long productId);
+
+    boolean getWishByProductUserId(Long productId, Long userId);
+
+    boolean getCartByProductUserId(Long productId, Long userId);
 }

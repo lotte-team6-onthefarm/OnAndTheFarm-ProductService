@@ -273,4 +273,14 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
 
         return reviewInfoToExbt;
     }
+
+    public boolean getWishByProductUserId(Long productId, Long userId){
+        boolean isWishExist = productWishRepository.existsByUserIdAndProduct_ProductId(userId, productId);
+        return isWishExist;
+    }
+
+    public boolean getCartByProductUserId(Long productId, Long userId){
+        boolean isCartExist = cartRepository.existsByUserIdAndProduct_ProductId(userId, productId);
+        return isCartExist;
+    }
 }
