@@ -11,7 +11,7 @@ import com.team6.onandthefarmproductservice.entity.Product;
 
 public interface ProductPagingRepository extends PagingAndSortingRepository<Product, Long> {
 
-	@Query(value = "select p from Product p join fetch p.category",
+	@Query(value = "select p from Product p join fetch p.category where p.productStatus ='selling' or p.productStatus ='soldout'",
 			countQuery = "select count(p) from Product p")
 	Page<Product> findProductOrderBy(PageRequest pageRequest);
 
