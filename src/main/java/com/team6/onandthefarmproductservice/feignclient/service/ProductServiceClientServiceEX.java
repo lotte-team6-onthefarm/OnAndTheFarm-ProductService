@@ -32,4 +32,10 @@ public interface ProductServiceClientServiceEX {
     List<WishVo> getWishListByMemberId(Long memberId);
 
     ProductVo getProductVoByProductId(Long productId);
+
+    ReviewInfoToExbt getReviewInfoByProductId(Long productId);
+
+    boolean getWishByProductUserId(Long productId, Long userId);
+
+    boolean getCartByProductUserId(Long productId, Long userId);
 }

@@ -9,6 +9,7 @@ import com.team6.onandthefarmproductservice.entity.Cart;
 import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.entity.ProductQna;
 import com.team6.onandthefarmproductservice.entity.ReservedOrder;
+import com.team6.onandthefarmproductservice.entity.Review;
 import com.team6.onandthefarmproductservice.entity.Wish;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.kafka.ProductOrderChannelAdapter;
@@ -17,6 +18,7 @@ import com.team6.onandthefarmproductservice.repository.ProductQnaRepository;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.repository.ProductWishRepository;
 import com.team6.onandthefarmproductservice.repository.ReservedOrderRepository;
+import com.team6.onandthefarmproductservice.repository.ReviewRepository;
 import com.team6.onandthefarmproductservice.vo.WishVo;
 import com.team6.onandthefarmproductservice.vo.product.WishPageVo;
 
@@ -43,16 +45,12 @@ import java.util.List;
 public class ProductServiceClientServiceImpEX implements ProductServiceClientServiceEX {
 
     private final CartRepository cartRepository;
-
     private final ProductRepository productRepository;
-
     private final ProductQnaRepository productQnaRepository;
-
     private final ProductOrderChannelAdapter productOrderChannelAdapter;
-
     private final ReservedOrderRepository reservedOrderRepository;
-
     private final ProductWishRepository productWishRepository;
+    private final ReviewRepository reviewRepository;
 
     public List<CartVo> findCartByUserId(Long userId){
         ModelMapper modelMapper = new ModelMapper();
@@ -250,5 +248,39 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
                 .productViewCount(product.getProductViewCount())
                 .build();
         return productVo;
+    }
+
+    @Override
+    public ReviewInfoToExbt getReviewInfoByProductId(Long productId){
+        Product product = productRepository.findProductByProductId(productId);
+        List<Review> reviews = reviewRepository.findReviewByProduct(product);
+
+        double reviewRate = 0.0;
+        Integer reviewCount = reviews.size();
+
+        if(reviews.size() > 0) {
+            Integer reviewSum = 0;
+            for (Review review : reviews) {
+                reviewSum += review.getReviewRate();
+            }
+            reviewRate = (double) reviewSum / reviews.size();
+        }
+
+        ReviewInfoToExbt reviewInfoToExbt = ReviewInfoToExbt.builder()
+                .reviewRate(reviewRate)
+                .reviewCount(reviewCount)
+                .build();
+
+        return reviewInfoToExbt;
+    }
+
+    public boolean getWishByProductUserId(Long productId, Long userId){
+        boolean isWishExist = productWishRepository.existsByUserIdAndProduct_ProductId(userId, productId);
+        return isWishExist;
+    }
+
+    public boolean getCartByProductUserId(Long productId, Long userId){
+        boolean isCartExist = cartRepository.existsByUserIdAndProduct_ProductId(userId, productId);
+        return isCartExist;
     }
 }
