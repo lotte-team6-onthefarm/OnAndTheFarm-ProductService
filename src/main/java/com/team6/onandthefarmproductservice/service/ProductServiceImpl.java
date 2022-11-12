@@ -796,7 +796,7 @@ public class ProductServiceImpl implements ProductService {
 		if(product.getProductSoldCount()==0){
 			product.setProductStatus("soldout");
 		}
-		reservedOrderRepository.findByOrderSerial(orderSerial).get().setIdempoStatus(true);
+		reservedOrderRepository.findByOrderSerial(orderSerial).get().setIdempoStatus("true");
 	}
 
 	@Override
@@ -1178,7 +1178,7 @@ public class ProductServiceImpl implements ProductService {
 	public boolean isAlreadyProcessedOrderId(String orderId) {
 		// 처리된 메시지가 있는지 확인
 		boolean result
-				= reservedOrderRepository.existsByReservedOrderIdAndIdempoStatus(Long.valueOf(orderId),true);
+				= reservedOrderRepository.existsByReservedOrderIdAndIdempoStatus(Long.valueOf(orderId),"true");
 
 		if(!result){ // 처리된 메시지가 없는 경우 중복되지 않은 메시지
 			return true; //

@@ -6,6 +6,7 @@ import com.team6.onandthefarmproductservice.ParticipantLink;
 import com.team6.onandthefarmproductservice.entity.ReservedOrder;
 import com.team6.onandthefarmproductservice.feignclient.service.ProductServiceClientServiceEX;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
+import com.team6.onandthefarmproductservice.kafka.vo.Payload;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
 import com.team6.onandthefarmproductservice.vo.WishVo;
 
@@ -90,11 +91,11 @@ public class ProductServiceClientControllerEX {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
         // 주문 예약 테이블에 예약 저장
-        ReservedOrder reservedOrder = productServiceClientService.reservedOrder(productList,orderSerial);
+        Payload reservedOrder = productServiceClientService.reservedOrder(productList,orderSerial);
 
         final ParticipantLink participantLink = buildParticipantLink(
-                reservedOrder.getReservedOrderId(),
-                reservedOrder.getExpireTime());
+                reservedOrder.getReserved_order_id(),
+                reservedOrder.getExpire_time());
         return new ResponseEntity<>(participantLink, HttpStatus.CREATED);
     }
 
