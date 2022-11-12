@@ -13,6 +13,10 @@ import com.team6.onandthefarmproductservice.entity.Review;
 import com.team6.onandthefarmproductservice.entity.Wish;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
 import com.team6.onandthefarmproductservice.kafka.ProductOrderChannelAdapter;
+import com.team6.onandthefarmproductservice.kafka.vo.Field;
+import com.team6.onandthefarmproductservice.kafka.vo.KafkaOrderDto;
+import com.team6.onandthefarmproductservice.kafka.vo.Payload;
+import com.team6.onandthefarmproductservice.kafka.vo.Schema;
 import com.team6.onandthefarmproductservice.repository.CartRepository;
 import com.team6.onandthefarmproductservice.repository.ProductQnaRepository;
 import com.team6.onandthefarmproductservice.repository.ProductRepository;
@@ -29,14 +33,13 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -51,6 +54,24 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
     private final ReservedOrderRepository reservedOrderRepository;
     private final ProductWishRepository productWishRepository;
     private final ReviewRepository reviewRepository;
+
+    private final KafkaTemplate<String,String> kafkaTemplate;
+
+    private final String topic = "reserved_order_sink";
+
+    List<Field> fields = Arrays.asList(new Field("int64",false,"reserved_order_id"),
+            new Field("string",true,"created_date"),
+            new Field("string",true,"expire_time"),
+            new Field("string",true,"idempo_status"),
+            new Field("string",true,"order_serial"),
+            new Field("string",true,"product_list"),
+            new Field("string",true,"status"));
+    Schema schema = Schema.builder()
+            .type("struct")
+            .fields(fields)
+            .optional(false)
+            .name("reserved_order")
+            .build();
 
     public List<CartVo> findCartByUserId(Long userId){
         ModelMapper modelMapper = new ModelMapper();
@@ -129,15 +150,26 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
      * @param productList
      * @return
      */
-    public ReservedOrder reservedOrder(String productList,String orderSerial) {
-        ReservedOrder reservedOrder = ReservedOrder.builder()
-                .productList(productList)
-                .orderSerial(orderSerial)
-                .createdDate(LocalDateTime.now().toString())
-                .expireTime(LocalDateTime.now().plus(10l, ChronoUnit.SECONDS).toString())
-                .idempoStatus(false)
+    public Payload reservedOrder(String productList,String orderSerial) {
+        Payload payload = Payload.builder()
+                .reserved_order_id(Long.valueOf(new Date().getTime()))
+                .product_list(productList)
+                .order_serial(orderSerial)
+                .created_date(LocalDateTime.now().toString())
+                .expire_time(LocalDateTime.now().plus(10l, ChronoUnit.SECONDS).toString())
+                .idempo_status("false")
                 .build();
-        return reservedOrderRepository.save(reservedOrder);
+        KafkaOrderDto kafkaOrderDto = new KafkaOrderDto(schema,payload);
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = "";
+        try{
+            jsonInString = mapper.writeValueAsString(kafkaOrderDto);
+        }catch(JsonProcessingException ex){
+            ex.printStackTrace();
+        }
+
+        kafkaTemplate.send(topic,jsonInString);
+        return payload;
     }
 
     /**

@@ -4,6 +4,7 @@ import com.team6.onandthefarmproductservice.entity.Product;
 import com.team6.onandthefarmproductservice.entity.ReservedOrder;
 import com.team6.onandthefarmproductservice.entity.Wish;
 import com.team6.onandthefarmproductservice.feignclient.vo.*;
+import com.team6.onandthefarmproductservice.kafka.vo.Payload;
 import com.team6.onandthefarmproductservice.vo.WishVo;
 import com.team6.onandthefarmproductservice.vo.product.WishPageVo;
 
@@ -23,7 +24,7 @@ public interface ProductServiceClientServiceEX {
 
     List<ProductQnaVo> findBeforeAnswerProductQna(Long sellerId);
 
-    ReservedOrder reservedOrder(String productList,String orderSerial);
+    Payload reservedOrder(String productList, String orderSerial);
 
     Boolean confirmOrder(Long id);
 
