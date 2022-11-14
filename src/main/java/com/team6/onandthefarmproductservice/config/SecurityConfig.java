@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/user/members/login", "/api/user/members/login/phone", "/api/seller/members/login", "/api/seller/members/signup", "/api/seller/members/email", "/api/seller/members/emailConfirm", "/api/seller/members/search/id", "/api/seller/members/search/passwd", "/api/seller/members/passwd").permitAll()
-                .antMatchers("/api/user/product/list/**", "/api/user/product/{\\d+}", "/api/user/product/QnA/{\\d+}").permitAll()
+                .antMatchers("/api/user/product/list/**", "/api/user/product/detail/{\\d+}", "/api/user/product/QnA/{\\d+}").permitAll()
                 .antMatchers("/api/user/review/info", "/api/user/review/list/**").permitAll()
                 .antMatchers("/api/seller/product/list/**").permitAll()
 //                .antMatchers("/api/user/**").hasAnyRole("USER", "SELLER")
