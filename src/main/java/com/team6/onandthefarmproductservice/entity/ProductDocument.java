@@ -1,5 +1,6 @@
 package com.team6.onandthefarmproductservice.entity;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Document(indexName = "product")
 @Mapping(mappingPath = "elastic/product-mapping.json")
 @Setting(settingPath = "elastic/product-setting.json")
