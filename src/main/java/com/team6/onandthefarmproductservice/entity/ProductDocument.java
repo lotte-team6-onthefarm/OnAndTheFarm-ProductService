@@ -1,4 +1,4 @@
-package com.team6.onandthefarm.entity.product;
+package com.team6.onandthefarmproductservice.entity;
 
 import javax.persistence.Id;
 
