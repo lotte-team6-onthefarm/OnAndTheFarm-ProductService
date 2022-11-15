@@ -156,7 +156,7 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
                 .product_list(productList)
                 .order_serial(orderSerial)
                 .created_date(LocalDateTime.now().toString())
-                .expire_time(LocalDateTime.now().plus(10l, ChronoUnit.SECONDS).toString())
+                .expire_time(LocalDateTime.now().plus(100l, ChronoUnit.SECONDS).toString())
                 .idempo_status("false")
                 .build();
         KafkaOrderDto kafkaOrderDto = new KafkaOrderDto(schema,payload);
