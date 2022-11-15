@@ -38,7 +38,7 @@ public class ReservedOrder {
 
     public void validate() {
         validateStatus();
-        validateExpired();
+        //validateExpired();
     }
     private void validateStatus() {
         if(this.getStatus()==null) return;
@@ -55,6 +55,7 @@ public class ReservedOrder {
         Integer ss = Integer.valueOf(this.expireTime.substring(17,19));
 
         if(LocalDateTime.now().isAfter(LocalDateTime.of(year,month,day,hh,mm,ss))) {
+            log.error("!!!time out!!!");
             throw new IllegalArgumentException("Expired");
         }
     }
