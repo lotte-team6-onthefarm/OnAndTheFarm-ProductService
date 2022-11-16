@@ -367,9 +367,9 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/search")
+	@PostMapping(value = "/search")
 	@ApiOperation(value = "상품 검색")
-	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> searchProduct(
+	public ResponseEntity<BaseResponse<ProductSearchResponseResult>> searchProduct(
 			@ApiIgnore Principal principal,
 			@RequestBody SearchProductVo searchProductVo){
 		Long userId = null;
