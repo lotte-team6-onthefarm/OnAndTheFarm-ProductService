@@ -16,9 +16,9 @@ public class ProductSearchResponse {
 	private String productName;
 	private Integer productPrice;
 	private String sellerName;
-	private boolean wishStatus;
-	private boolean cartStatus;
+	private boolean productWishStatus;
+	private boolean productCartStatus;
 	private double reviewRate;
-	private Integer reviewCount;
-	private String imgSrc;
+	private Integer productReviewCount;
+	private String productMainImgSrc;
 }

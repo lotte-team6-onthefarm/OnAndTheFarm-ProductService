@@ -1216,11 +1216,11 @@ public class ProductServiceImpl implements ProductService {
 			productSearchResponse.setProductName(productDetail.getProductName());
 			productSearchResponse.setSellerName(productDetail.getSellerName());
 			productSearchResponse.setProductPrice(productDetail.getProductPrice());
-			productSearchResponse.setReviewCount(productDetail.getReviewCount());
+			productSearchResponse.setProductReviewCount(productDetail.getReviewCount());
 			productSearchResponse.setReviewRate(productDetail.getReviewRate());
-			productSearchResponse.setWishStatus(productDetail.isProductWishStatus());
-			productSearchResponse.setCartStatus(productDetail.isProductCartStatus());
-			productSearchResponse.setImgSrc(productDetail.getProductMainImgSrc());
+			productSearchResponse.setProductWishStatus(productDetail.isProductWishStatus());
+			productSearchResponse.setProductCartStatus(productDetail.isProductCartStatus());
+			productSearchResponse.setProductMainImgSrc(productDetail.getProductMainImgSrc());
 			response.add(productSearchResponse);
 		}
 
