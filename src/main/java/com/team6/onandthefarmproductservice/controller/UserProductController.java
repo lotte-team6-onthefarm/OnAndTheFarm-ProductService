@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import com.team6.onandthefarmproductservice.dto.product.SearchProductVoDto;
 import com.team6.onandthefarmproductservice.vo.product.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -361,6 +362,32 @@ public class UserProductController {
 				.httpStatus(HttpStatus.OK)
 				.message("OK")
 				.data(qnAList)
+				.build();
+
+		return new ResponseEntity(baseResponse, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/search")
+	@ApiOperation(value = "상품 검색")
+	public ResponseEntity<BaseResponse<List<ProductSelectionResponse>>> searchProduct(
+			@ApiIgnore Principal principal,
+			@RequestBody SearchProductVo searchProductVo){
+		Long userId = null;
+		if (principal != null){
+			String[] principalInfo = principal.getName().split(" ");
+			userId = Long.parseLong(principalInfo[0]);
+		}
+
+		SearchProductVoDto searchProductVoDto = new SearchProductVoDto();
+		searchProductVoDto.setSearchProduct(searchProductVo.getSearchText());
+		searchProductVoDto.setPageNumber(searchProductVo.getPageNumber());
+
+		ProductSearchResponseResult products = productService.searchProduct(userId, searchProductVoDto);
+
+		BaseResponse baseResponse = BaseResponse.builder()
+				.httpStatus(HttpStatus.OK)
+				.message("search product")
+				.data(products)
 				.build();
 
 		return new ResponseEntity(baseResponse, HttpStatus.OK);

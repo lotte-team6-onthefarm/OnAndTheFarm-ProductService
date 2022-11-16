@@ -70,4 +70,6 @@ public interface ProductService {
     Boolean createQnaAnswer(SellerQnaDto sellerQnaDto);
 
     boolean isAlreadyProcessedOrderId(String orderId);
+
+    ProductSearchResponseResult searchProduct(Long userId, SearchProductVoDto searchProductVoDto);
 }
