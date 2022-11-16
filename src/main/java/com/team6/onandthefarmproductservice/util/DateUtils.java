@@ -3,6 +3,7 @@ package com.team6.onandthefarmproductservice.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Component;
 public class DateUtils {
 
     public String transDate(String pattern){
+        TimeZone time;
+        time = TimeZone.getTimeZone("Asia/Seoul");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, Locale.KOREA);
+        simpleDateFormat.setTimeZone(time);
         String date = simpleDateFormat.format(new Date());
         return date;
     }
