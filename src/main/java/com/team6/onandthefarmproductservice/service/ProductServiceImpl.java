@@ -10,6 +10,9 @@ import com.team6.onandthefarmproductservice.repository.*;
 import com.team6.onandthefarmproductservice.vo.PageVo;
 import com.team6.onandthefarmproductservice.vo.order.OrderClientSellerIdAndDateResponse;
 import com.team6.onandthefarmproductservice.vo.product.*;
+
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +59,7 @@ public class ProductServiceImpl implements ProductService {
 	private CartRepository cartRepository;
 	private ReviewRepository reviewRepository;
 	private ReservedOrderRepository reservedOrderRepository;
+	private ProductSearchQueryRepository productSearchQueryRepository;
 	private DateUtils dateUtils;
 
 	private S3Upload s3Upload;
@@ -75,6 +81,7 @@ public class ProductServiceImpl implements ProductService {
 							  ProductPagingRepository productPagingRepository,
 							  ReviewRepository reviewRepository,
 							  ProductImgRepository productImgRepository,
+							  ProductSearchQueryRepository productSearchQueryRepository,
 							  S3Upload s3Upload,
 							  ReservedOrderRepository reservedOrderRepository,
 							  CircuitBreakerFactory circuitBreakerFactory) {
@@ -94,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
 		this.s3Upload=s3Upload;
 		this.productImgRepository=productImgRepository;
 		this.reservedOrderRepository=reservedOrderRepository;
+		this.productSearchQueryRepository = productSearchQueryRepository;
 		this.circuitBreakerFactory=circuitBreakerFactory;
 	}
 
@@ -1185,5 +1193,83 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 		return false;
+	}
+
+	public ProductSearchResponseResult searchProduct(Long userId, SearchProductVoDto searchProductVoDto){
+		MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("name", searchProductVoDto.getSearchProduct());
+		NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
+				.withQuery(matchQueryBuilder)
+				.build();
+
+		PageRequest pageRequest = PageRequest.of(searchProductVoDto.getPageNumber(), 16 );
+
+		// List<ProductDocument> contents = productSearchRepository.findByName(nativeSearchQuery);
+		ProductSearchInfoResponse productSearchInfoResponse = productSearchQueryRepository.findByStartWithProductName(searchProductVoDto.getSearchProduct(), pageRequest);
+
+		List<ProductDocument> contents = productSearchInfoResponse.getProductDocuments();
+		List<ProductSearchResponse> response = new ArrayList<>();
+
+		for (ProductDocument productDocument : contents) {
+			ProductDetailResponse productDetail = findProductDetailForSearch(userId, productDocument.getId());
+			ProductSearchResponse productSearchResponse = new ProductSearchResponse();
+			productSearchResponse.setProductId(productDetail.getProductId());
+			productSearchResponse.setProductName(productDetail.getProductName());
+			productSearchResponse.setSellerName(productDetail.getSellerName());
+			productSearchResponse.setProductPrice(productDetail.getProductPrice());
+			productSearchResponse.setReviewCount(productDetail.getReviewCount());
+			productSearchResponse.setReviewRate(productDetail.getReviewRate());
+			productSearchResponse.setWishStatus(productDetail.isProductWishStatus());
+			productSearchResponse.setCartStatus(productDetail.isProductCartStatus());
+			productSearchResponse.setImgSrc(productDetail.getProductMainImgSrc());
+			response.add(productSearchResponse);
+		}
+
+		ProductSearchResponseResult productSearchResponseResult = ProductSearchResponseResult.builder()
+				.productSearchResponses(response)
+				.pageVo(productSearchInfoResponse.getPageVo())
+				.build();
+		return productSearchResponseResult;
+	}
+
+	public ProductDetailResponse findProductDetailForSearch(Long userId, Long productId) {
+		Product product = productRepository.findById(productId).get();
+		product.setProductViewCount(product.getProductViewCount()+1);
+		SellerClientSellerDetailResponse sellerClientSellerDetailResponse = sellerServiceClient.findBySellerId(product.getSellerId());
+		ProductDetailResponse productDetailResponse = new ProductDetailResponse(product, sellerClientSellerDetailResponse);
+		productDetailResponse.setProductViewCount(productDetailResponse.getProductViewCount()+1);
+		if(userId != null){
+			Optional<Wish> savedWish = productWishRepository.findWishByUserAndProduct(userId, productId);
+			if(savedWish.isPresent()){
+				productDetailResponse.setProductWishStatus(true);
+			}
+
+			Optional<Cart> savedCart = cartRepository.findNotDeletedCartByProduct(productId, userId);
+			if(savedCart.isPresent()){
+				productDetailResponse.setProductCartStatus(true);
+			}
+		}
+
+		List<ProductImg> productImgList = productImgRepository.findByProduct(product);
+		List<ProductImageResponse> productImgSrcList = new ArrayList<>();
+		for(ProductImg productImg : productImgList){
+			ProductImageResponse productImageResponse = new ProductImageResponse();
+			productImageResponse.setProductImgId(productImg.getProductImgId());
+			productImageResponse.setProductImgSrc(productImg.getProductImgSrc());
+			productImgSrcList.add(productImageResponse);
+		}
+		productDetailResponse.setProductImageList(productImgSrcList);
+
+		List<Review> reviewList = reviewRepository.findReviewByProduct(product);
+		productDetailResponse.setReviewCount(reviewList.size());
+		productDetailResponse.setReviewRate(0.0);
+		if(reviewList.size() > 0) {
+			Integer reviewSum = 0;
+			for (Review review : reviewList) {
+				reviewSum += review.getReviewRate();
+			}
+			productDetailResponse.setReviewRate((double) reviewSum / reviewList.size());
+		}
+
+		return productDetailResponse;
 	}
 }

@@ -1,0 +1,29 @@
+{
+  "properties" : {
+
+    "id": {
+      "type" : "text",
+      "analyzer" : "korean"
+    },
+    "name": {
+      "type" : "text",
+      "analyzer" : "korean"
+    },
+    "categoryName": {
+      "type" : "text",
+      "analyzer" : "korean"
+    },
+    "sellerName": {
+      "type" : "text",
+      "analyzer" : "korean"
+    },
+    "productPrice": {
+      "type" : "text",
+      "analyzer" : "korean"
+    },
+    "productOriginPlace": {
+      "type" : "text",
+      "analyzer" : "korean"
+    }
+  }
+}
