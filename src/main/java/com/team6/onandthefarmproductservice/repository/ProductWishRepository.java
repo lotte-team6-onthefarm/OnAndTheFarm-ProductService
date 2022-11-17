@@ -13,7 +13,7 @@ import com.team6.onandthefarmproductservice.entity.Wish;
 
 public interface ProductWishRepository extends CrudRepository<Wish, Long> {
 
-    @Query("select w from Wish w join fetch w.product where w.userId =:userId")
+    @Query("select w from Wish w join fetch w.product where w.userId =:userId and w.wishStatus=true")
     List<Wish> findWishListByUserId(@Param("userId") Long userId);
 
     boolean existsByUserIdAndProduct_ProductId(Long userId,Long productId);
