@@ -367,11 +367,11 @@ public class UserProductController {
 		return new ResponseEntity(baseResponse, HttpStatus.OK);
 	}
 
-	@PostMapping(value = "/search")
+	@GetMapping(value = "/search/{search-text}/{page-no}")
 	@ApiOperation(value = "상품 검색")
 	public ResponseEntity<BaseResponse<ProductSearchResponseResult>> searchProduct(
 			@ApiIgnore Principal principal,
-			@RequestBody SearchProductVo searchProductVo){
+			@PathVariable("search-text") String searchText, @PathVariable("page-no") Integer pageNumber){
 		Long userId = null;
 		if (principal != null){
 			String[] principalInfo = principal.getName().split(" ");
@@ -379,8 +379,8 @@ public class UserProductController {
 		}
 
 		SearchProductVoDto searchProductVoDto = new SearchProductVoDto();
-		searchProductVoDto.setSearchProduct(searchProductVo.getSearchText());
-		searchProductVoDto.setPageNumber(searchProductVo.getPageNumber());
+		searchProductVoDto.setSearchProduct(searchText);
+		searchProductVoDto.setPageNumber(pageNumber);
 
 		ProductSearchResponseResult products = productService.searchProduct(userId, searchProductVoDto);
 
