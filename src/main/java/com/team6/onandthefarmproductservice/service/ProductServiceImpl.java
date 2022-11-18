@@ -235,6 +235,19 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public List<Long> cancelProductFromWishList(ProductWishCancelDto productWishCancelDto){
 
+		if(productWishCancelDto.getProductId() != null){
+			Optional<Wish> wish = productWishRepository.findWishByUserAndProduct(productWishCancelDto.getUserId(), productWishCancelDto.getProductId());
+			if(wish.isPresent()){
+				wish.get().setWishStatus(false);
+				Product product = productRepository.findById(productWishCancelDto.getProductId()).get();
+				product.setProductWishCount(product.getProductWishCount() - 1);
+
+				List<Long> wishIdList = new ArrayList<>();
+				wishIdList.add(wish.get().getWishId());
+				return wishIdList;
+			}
+		}
+
 		for(Long wishId : productWishCancelDto.getWishId()) {
 			Wish wish = productWishRepository.findById(wishId).get();
 			wish.setWishStatus(false);
@@ -326,14 +339,12 @@ public class ProductServiceImpl implements ProductService {
 		ProductDetailResponse productDetailResponse = new ProductDetailResponse(product, sellerClientSellerDetailResponse);
 		productDetailResponse.setProductViewCount(productDetailResponse.getProductViewCount()+1);
 		if(userId != null){
-			//Optional<Wish> savedWish = productWishRepository.findWishByUserAndProduct(userId, productId);
-			boolean savedWish = productWishRepository.existsByUserIdAndProduct_ProductId(userId,productId);
+			boolean savedWish = productWishRepository.existsByUserIdAndProduct_ProductIdAndWishStatus(userId, productId, true);
 			if(savedWish){
 				productDetailResponse.setProductWishStatus(true);
 			}
 
-			//Optional<Cart> savedCart = cartRepository.findNotDeletedCartByProduct(productId, userId);
-			boolean savedCart = cartRepository.existsByUserIdAndProduct_ProductId(userId,productId);
+			boolean savedCart = cartRepository.existsByUserIdAndProduct_ProductIdAndCartStatus(userId, productId, true);
 			if(savedCart){
 				productDetailResponse.setProductCartStatus(true);
 			}

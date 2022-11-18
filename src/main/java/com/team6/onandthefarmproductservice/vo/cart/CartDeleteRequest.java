@@ -13,4 +13,6 @@ public class CartDeleteRequest {
 
     private List<Long> cartList;
 
+    private Long productId;
+
 }

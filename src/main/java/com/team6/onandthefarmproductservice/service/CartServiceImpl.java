@@ -124,7 +124,16 @@ public class CartServiceImpl implements CartService{
      * @return cartId
      */
     @Override
-    public List<Long> deleteCart(CartDeleteDto cartDeleteDto) {
+    public List<Long> deleteCart(Long userId, CartDeleteDto cartDeleteDto) {
+
+        if(cartDeleteDto.getProductId() != null){
+            Optional<Cart> cart = cartRepository.findNotDeletedCartByProduct(cartDeleteDto.getProductId(), userId);
+            cart.get().setCartStatus(false);
+
+            List<Long> cartIdList = new ArrayList<>();
+            cartIdList.add(cart.get().getCartId());
+            return cartIdList;
+        }
 
         for(Long cartId : cartDeleteDto.getCartList()) {
             Optional<Cart> cart = cartRepository.findById(cartId);

@@ -130,12 +130,23 @@ public class CartController {
 
     @PutMapping("/delete")
     @ApiOperation(value = "장바구니 삭제")
-    public ResponseEntity<BaseResponse> deleteCart(@RequestBody CartDeleteRequest cartDeleteRequest){
+    public ResponseEntity<BaseResponse> deleteCart(@ApiIgnore Principal principal, @RequestBody CartDeleteRequest cartDeleteRequest){
+
+        if(principal == null){
+            BaseResponse baseResponse = BaseResponse.builder()
+                    .httpStatus(HttpStatus.FORBIDDEN)
+                    .message("no authorization")
+                    .build();
+            return new ResponseEntity(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        String[] principalInfo = principal.getName().split(" ");
+        Long userId = Long.parseLong(principalInfo[0]);
 
         CartDeleteDto cartDeleteDto = CartDeleteDto.builder()
                 .cartList(cartDeleteRequest.getCartList()).build();
 
-        List<Long> cartId = cartService.deleteCart(cartDeleteDto);
+        List<Long> cartId = cartService.deleteCart(userId, cartDeleteDto);
 
         BaseResponse baseResponse = BaseResponse.builder()
                 .httpStatus(HttpStatus.CREATED)

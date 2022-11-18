@@ -12,4 +12,6 @@ import java.util.List;
 public class CartDeleteDto {
 
     private List<Long> cartList;
+
+    private Long productId;
 }

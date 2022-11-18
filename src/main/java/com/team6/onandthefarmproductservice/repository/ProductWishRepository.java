@@ -16,13 +16,13 @@ public interface ProductWishRepository extends CrudRepository<Wish, Long> {
     @Query("select w from Wish w join fetch w.product where w.userId =:userId and w.wishStatus=true")
     List<Wish> findWishListByUserId(@Param("userId") Long userId);
 
-    boolean existsByUserIdAndProduct_ProductId(Long userId,Long productId);
+    boolean existsByUserIdAndProduct_ProductIdAndWishStatus(Long userId, Long productId, Boolean wishStatus);
 
-    @Query(value = "select w from Wish w join fetch w.product where w.userId =:userId",
-            countQuery = "select count(w) from Wish w")
+    @Query(value = "select w from Wish w join fetch w.product where w.userId =:userId and w.wishStatus = true",
+            countQuery = "select count(w) from Wish w where w.userId =:userId and w.wishStatus = true")
     Page<Wish> findWishListPageByUserId(PageRequest pageRequest, @Param("userId") Long userId);
 
-    @Query("select w from Wish w join fetch w.product where w.userId =:userId and w.product.productId=:productId")
+    @Query("select w from Wish w join fetch w.product where w.userId =:userId and w.product.productId=:productId and w.wishStatus=true")
     Optional<Wish> findWishByUserAndProduct(@Param("userId")Long userId, @Param("productId")Long productId);
 
 }
