@@ -15,4 +15,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductWishCancelRequest {
 	private List<Long> wishId;
+	private Long productId;
 }

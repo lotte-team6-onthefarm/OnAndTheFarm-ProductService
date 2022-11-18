@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class
 ProductWishCancelDto {
 	private List<Long> wishId;
+	private Long productId;
 	private Long userId;
 }

@@ -307,12 +307,12 @@ public class ProductServiceClientServiceImpEX implements ProductServiceClientSer
     }
 
     public boolean getWishByProductUserId(Long productId, Long userId){
-        boolean isWishExist = productWishRepository.existsByUserIdAndProduct_ProductId(userId, productId);
+        boolean isWishExist = productWishRepository.existsByUserIdAndProduct_ProductIdAndWishStatus(userId, productId, true);
         return isWishExist;
     }
 
     public boolean getCartByProductUserId(Long productId, Long userId){
-        boolean isCartExist = cartRepository.existsByUserIdAndProduct_ProductId(userId, productId);
+        boolean isCartExist = cartRepository.existsByUserIdAndProduct_ProductIdAndCartStatus(userId, productId, true);
         return isCartExist;
     }
 }
