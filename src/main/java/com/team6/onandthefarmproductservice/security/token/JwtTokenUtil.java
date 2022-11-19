@@ -19,10 +19,6 @@ public class JwtTokenUtil {
 
     private final Key secretKey;
 
-    private Long tokenPeriod; //60분*24시간=1440분, 86400000 = 1000L * 60L * 1440L
-
-    private Long refreshPeriod; //7,776,000,000 = 1000L * 60L * 60L * 24L * 30L * 3L
-
     public static final String TOKEN_PREFIX = "Bearer ";
 
     Environment env;
@@ -33,8 +29,6 @@ public class JwtTokenUtil {
         this.env = env;
 
         String secretKey = env.getProperty("custom-api-key.jwt.secret");
-        tokenPeriod = Long.parseLong(env.getProperty("custom-api-key.jwt.token-period"));
-        refreshPeriod = Long.parseLong(env.getProperty("custom-api-key.jwt.refresh-token-period"));
 
         // secretKey 바이트로 변환하여 Base64로 인코딩
         String encodingSecretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
